@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>SWEETO TECH - Storefront</title>
+  </head>
+  <body>
+    <div id="google_translate_element" style="display: none;"></div>
+    <div id="root"></div>
+    <script type="text/javascript">
+      function googleTranslateElementInit() {
+        new google.translate.TranslateElement({pageLanguage: 'en', autoDisplay: false}, 'google_translate_element');
+      }
+
+      (function() {
+        try {
+          var userLang = navigator.language || navigator.userLanguage; 
+          var langCode = userLang ? userLang.split('-')[0] : 'en';
+          
+          // Only auto-translate if not English and cookie isn't already set
+          if (langCode !== 'en' && document.cookie.indexOf('googtrans') === -1) {
+            // Set for current domain
+            document.cookie = "googtrans=/en/" + langCode + "; path=/";
+            if (window.location.hostname !== 'localhost') {
+              // Set for .domain as well
+              document.cookie = "googtrans=/en/" + langCode + "; domain=." + window.location.hostname + "; path=/";
+            }
+            
+            // Check if we already tried to reload to prevent infinite loops in private browsers
+            if (!sessionStorage.getItem('googtrans_reloaded')) {
+              sessionStorage.setItem('googtrans_reloaded', 'true');
+              window.location.reload();
+            }
+          }
+        } catch(e) { console.error("Translation error", e); }
+      })();
+    </script>
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

@@ -151,6 +151,30 @@ class ApiService {
     return true;
   }
 
+  // Image Upload Support
+  async uploadImage(file) {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+      const filePath = `product-images/${fileName}`;
+
+      const { data, error } = await supabase.storage
+        .from('products')
+        .upload(filePath, file);
+
+      if (error) throw error;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('products')
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (error) {
+      console.error('Error uploading image:', error.message);
+      throw error;
+    }
+  }
+
   async exportDb() {
     const db = {};
     const resources = ['products', 'categories', 'salesRecords', 'stockAdjustments', 'visits', 'video_ads', 'reviews', 'notifications', 'searchLogs', 'userLogs', 'subscribers', 'storeSettings'];

@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom';
 import { useWishlist } from '../contexts/WishlistContext';
 import { useCart } from '../contexts/CartContext';
 import { useStoreData } from '../contexts/StoreDataContext';
+import { useLocale } from '../contexts/LocaleContext';
 import { Star, Heart, ShoppingCart, Eye, X, MessageCircle, Zap, Clock, TrendingUp } from 'lucide-react';
 import { createPortal } from 'react-dom';
 
 const ProductCard = ({ product, showBadge }) => {
   const { formatPrice, currencySymbol, salesRecords, reviews } = useStoreData();
+  const { t } = useLocale();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { addToCart } = useCart();
   const [isHovered, setIsHovered] = useState(false);
@@ -116,14 +118,14 @@ const ProductCard = ({ product, showBadge }) => {
                   ? 'bg-red-500 text-white border-red-500'
                   : 'bg-white text-gray-900 hover:text-red-500 dark:bg-slate-800 dark:text-white border-white dark:border-slate-700'
                 }`}
-              title="Add to Wishlist"
+              title={t('addToWishlist')}
             >
               <Heart size={16} fill={isWishlisted ? "currentColor" : "none"} strokeWidth={2.5} />
             </button>
             <button
               onClick={(e) => { e.preventDefault(); openQuickView(); }}
               className="p-2.5 rounded-full bg-white text-gray-900 hover:text-blue-600 dark:bg-slate-800 dark:text-white backdrop-blur-xl shadow-2xl border border-white dark:border-slate-700 transition-all active:scale-90 hover:scale-110"
-              title="Quick View"
+              title={t('seePreview')}
             >
               <Eye size={16} strokeWidth={2.5} />
             </button>
@@ -144,27 +146,27 @@ const ProductCard = ({ product, showBadge }) => {
             {product.dealOfDay && (!showBadge || showBadge === 'deals') && (
               <span className="bg-gradient-to-r from-[#FF4D00] to-[#FF8A00] text-white text-[9px] font-black px-2.5 py-1.5 rounded-sm uppercase tracking-widest shadow-xl flex items-center gap-1.5 animate-pulse border border-white/10">
                 <Zap size={10} fill="white" className="text-white" />
-                Deal of the Day
+                {t('dealOfDay')}
               </span>
             )}
             
             {(product.newArrival || isNew) && (!showBadge || showBadge === 'new') && (
               <span className="bg-white/90 dark:bg-slate-900/90 text-black dark:text-white backdrop-blur-md text-[9px] font-black px-2.5 py-1.5 rounded-sm uppercase tracking-widest shadow-xl flex items-center gap-1.5 border border-gray-100 dark:border-slate-800">
                 <Clock size={10} strokeWidth={3} />
-                Newly Added
+                {t('newlyAdded')}
               </span>
             )}
 
             {product.trending && (!showBadge || showBadge === 'trending') && (
               <span className="bg-black dark:bg-white text-white dark:text-black text-[9px] font-black px-2.5 py-1.5 rounded-sm uppercase tracking-widest shadow-xl flex items-center gap-1.5">
                 <TrendingUp size={10} strokeWidth={3} />
-                Trending
+                {t('trending')}
               </span>
             )}
 
             {product.originalPrice && product.originalPrice > product.price && (
               <span className="bg-[#E62E04] text-white text-[10px] font-black px-3 py-1 rounded-sm shadow-xl">
-                -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
+                -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% {t('off')}
               </span>
             )}
           </div>
@@ -215,12 +217,12 @@ const ProductCard = ({ product, showBadge }) => {
             <div className="flex items-center gap-2">
               {product.originalPrice && product.originalPrice > product.price && (
                 <span className="bg-red-50 dark:bg-red-950/30 text-red-600 px-2 py-1 rounded-[4px] text-[10px] font-black uppercase tracking-wider border border-red-100 dark:border-red-900/20">
-                  Save {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
+                  {t('save')} {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
                 </span>
               )}
             </div>
             <span className="text-[11px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-widest">
-              {soldCount > 0 ? `${soldCount} SOLD` : '0 SOLD'}
+              {soldCount > 0 ? `${soldCount} ${t('sold')}` : `0 ${t('sold')}`}
             </span>
           </div>
         </div>
@@ -235,13 +237,13 @@ const ProductCard = ({ product, showBadge }) => {
               to={`/product/${product.id}`}
               className="w-full bg-black dark:bg-white text-white dark:text-black py-2.5 text-center text-[10px] font-black uppercase tracking-widest hover:bg-black/90 dark:hover:bg-white/90 transition-all rounded-lg shadow-sm"
             >
-              See preview
+              {t('seePreview')}
             </Link>
             <Link
               to={`/you-may-love?category=${encodeURIComponent(product.category)}&from=${product.id}`}
               className="w-full bg-white dark:bg-slate-800 text-black dark:text-white border border-gray-200 dark:border-slate-700 py-2 text-center text-[10px] font-black uppercase tracking-widest hover:bg-gray-50 dark:hover:bg-slate-700 transition-all rounded-lg"
             >
-              Similar items
+              {t('similarItems')}
             </Link>
           </div>
         </div>
@@ -329,7 +331,7 @@ const ProductCard = ({ product, showBadge }) => {
                     <span className="text-sm font-black text-gray-900 dark:text-white">{rating || '5.0'}</span>
                   </div>
                   <div className="w-px h-4 bg-gray-200" />
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{soldCount}+ Sold</span>
+                  <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{soldCount}+ {t('sold')}</span>
                 </div>
               </div>
 
@@ -344,9 +346,7 @@ const ProductCard = ({ product, showBadge }) => {
                 {/* Quick Color Selection */}
                 {product.colors && product.colors.length > 0 && (
                   <div className="mt-8 space-y-3">
-                    <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400">
-                      Color: <span className="text-gray-900 dark:text-white ml-1">{selectedColor?.name}</span>
-                    </h4>
+                      {t('color')}: <span className="text-gray-900 dark:text-white ml-1">{selectedColor?.name}</span>
                     <div className="flex flex-wrap gap-2">
                       {product.colors.map((color, idx) => (
                         <button
@@ -370,14 +370,14 @@ const ProductCard = ({ product, showBadge }) => {
                   onClick={() => { addToCart(product, 1, selectedColor); setShowQuickView(false); }}
                   className="w-full bg-black dark:bg-white text-white dark:text-black py-5 rounded-2xl font-black uppercase text-xs tracking-[0.2em] hover:scale-[1.02] active:scale-95 transition-all shadow-xl"
                 >
-                  Add to Cart {selectedColor && `(${selectedColor.name})`}
+                  {t('addToCart')} {selectedColor && `(${selectedColor.name})`}
                 </button>
                 <Link
                   to={`/product/${product.id}`}
                   onClick={() => setShowQuickView(false)}
                   className="w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white py-5 rounded-2xl font-black uppercase text-xs tracking-[0.2em] text-center hover:bg-gray-50 transition-all"
                 >
-                  View full details
+                  {t('viewFullDetails')}
                 </Link>
               </div>
             </div>

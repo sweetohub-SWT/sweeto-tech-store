@@ -1,5 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useStoreData } from '../contexts/StoreDataContext';
+import { useLocale } from '../contexts/LocaleContext';
 import ProductCard from './ProductCard';
 import { Link } from 'react-router-dom';
 
@@ -7,6 +8,7 @@ import SectionLayoutWrapper from './SectionLayoutWrapper';
 
 const RefrigeratorsSection = ({ title, showVideoPromo, videoAdId }) => {
   const { products } = useStoreData();
+  const { t } = useLocale();
 
   // Filter products for "Refrigerators" section ONLY if explicitly flagged
   const fridgeProducts = useMemo(() => {
@@ -25,14 +27,18 @@ const RefrigeratorsSection = ({ title, showVideoPromo, videoAdId }) => {
           <div className="flex flex-col items-start">
             <div className="flex items-center gap-6 mb-2">
               <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white uppercase italic tracking-tighter">
-                {title || <>Modern <span className="text-[var(--primary-color)]">Refrigerators</span></>}
+                {title === 'Modern Refrigerators' || title === 'Refrigerators' || !title ? (
+                  <>{t('modern')} <span className="text-[var(--primary-color)]">{t('refrigerators')}</span></>
+                ) : (
+                  title
+                )}
               </h2>
               <Link to="/search?q=refrigerators" className="text-[10px] font-black text-white uppercase tracking-[0.2em] hover:opacity-90 transition-opacity bg-[var(--primary-color)] px-4 py-1.5 rounded-full shadow-lg shadow-[rgba(var(--primary-rgb),0.2)]">
-                SHOP ALL
+                {t('viewAll')}
               </Link>
             </div>
             <div className="w-16 h-1.5 bg-[var(--primary-color)] mt-1 mb-6 rounded-full"></div>
-            <p className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-[0.3em]">Smart Cooling Solutions For Your Home</p>
+            <p className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-[0.3em]">{t('smartCoolingSolutions')}</p>
           </div>
         </div>
 

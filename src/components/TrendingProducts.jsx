@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useStoreData } from '../contexts/StoreDataContext';
+import { useLocale } from '../contexts/LocaleContext';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import ProductCard from './ProductCard';
 
@@ -8,6 +9,7 @@ import SectionLayoutWrapper from './SectionLayoutWrapper';
 
 const TrendingProducts = ({ title, isFirst, showVideoPromo, videoAdId }) => {
   const { products } = useStoreData();
+  const { t } = useLocale();
   const [page, setPage] = useState(0);
 
   const getFilteredProducts = () => {
@@ -41,7 +43,11 @@ const TrendingProducts = ({ title, isFirst, showVideoPromo, videoAdId }) => {
         <div className="flex flex-col items-start text-left mb-10">
           <div className="flex flex-col items-start">
             <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white uppercase italic tracking-tighter">
-              {title || <>Trending <span className="text-[var(--primary-color)]">Now</span></>}
+              {title === 'Trending Now' || title === 'Trending Products' || !title ? (
+                <>{t('trending')} <span className="text-[var(--primary-color)]"></span></>
+              ) : (
+                title
+              )}
             </h2>
             <div className="w-16 h-1.5 bg-[var(--primary-color)] mt-2 mb-6 rounded-full"></div>
           </div>
@@ -76,7 +82,7 @@ const TrendingProducts = ({ title, isFirst, showVideoPromo, videoAdId }) => {
 
         <div className="mt-8 text-center">
           <Link to="/search" className="inline-flex items-center gap-2 bg-[var(--primary-color)] text-white px-8 py-3.5 rounded-xl font-black uppercase text-xs tracking-widest hover:opacity-90 transition-all hover:gap-4 shadow-xl shadow-[rgba(var(--primary-rgb),0.2)]">
-            Discover More Products <ArrowRight size={16} />
+            {t('learnMore')} <ArrowRight size={16} />
           </Link>
         </div>
       </SectionLayoutWrapper>

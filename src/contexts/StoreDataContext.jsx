@@ -26,6 +26,12 @@ const DEFAULT_SETTINGS = {
   instagramUrl: '#',
   twitterUrl: '#',
   tiktokUrl: '#',
+  heroLayout: 'slider', // 'slider' or 'grid'
+  heroBanners: [
+    { id: 'main', productId: '', image: '', title: '', subtitle: '', link: '' },
+    { id: 'side1', productId: '', image: '', title: '', subtitle: '', link: '' },
+    { id: 'side2', productId: '', image: '', title: '', subtitle: '', link: '' }
+  ],
   homepageSections: [
     { id: 'hero', name: 'Hero Banner', enabled: true },
     { id: 'shop_by_category', name: 'Shop By Category', enabled: true },

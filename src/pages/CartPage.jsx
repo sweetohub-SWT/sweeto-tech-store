@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useCart } from '../contexts/CartContext';
 import { useStoreData } from '../contexts/StoreDataContext';
+import { useUserAuth } from '../contexts/UserAuthContext';
 import { 
   Trash2, ShoppingBag, ArrowRight, Minus, Plus, MessageCircle, 
   ChevronLeft, User, MapPin, CheckCircle2, ShieldCheck, Truck, 
@@ -13,14 +14,23 @@ import ProductCard from '../components/ProductCard';
 const CartPage = () => {
   const { cartItems, removeFromCart, updateQuantity, cartTotal, clearCart } = useCart();
   const { formatPrice, storeSettings, products } = useStoreData();
+  const { user, isAuthenticated } = useUserAuth();
   const navigate = useNavigate();
 
-  const [step, setStep] = useState('cart'); // 'cart' or 'delivery'
+  const [step, setStep] = useState('cart'); // 'cart' or 'order_info'
   const [customerDetails, setCustomerDetails] = useState({
     name: '',
+    phone: '',
     location: '',
     notes: ''
   });
+
+  // Pre-fill name from user account
+  React.useEffect(() => {
+    if (user?.display_name) {
+      setCustomerDetails(prev => ({ ...prev, name: user.display_name }));
+    }
+  }, [user]);
 
   const handleWhatsAppCheckout = (e) => {
     e.preventDefault();
@@ -52,9 +62,10 @@ const CartPage = () => {
       .slice(0, 4);
   }, [products, cartItems]);
 
-  const isDetailsValid = customerDetails.name.trim() !== '' && customerDetails.location.trim() !== '';
-  const freeShippingThreshold = 50000;
-  const progressToFreeShipping = Math.min((cartTotal / freeShippingThreshold) * 100, 100);
+  const isDetailsValid = 
+    customerDetails.name.trim() !== '' && 
+    customerDetails.phone.trim() !== '' && 
+    customerDetails.location.trim() !== '';
 
   if (cartItems.length === 0) {
     return (
@@ -93,40 +104,15 @@ const CartPage = () => {
             <span className="text-[10px] font-black uppercase tracking-widest">Shopping Cart</span>
           </div>
           <div className="w-12 h-px bg-gray-100 dark:bg-slate-800" />
-          <div className={`flex items-center gap-2 ${step === 'delivery' ? 'text-black dark:text-white' : 'text-gray-300'}`}>
-            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black ${step === 'delivery' ? 'bg-black text-white dark:bg-white dark:text-black' : 'bg-gray-100 dark:bg-slate-800'}`}>2</span>
-            <span className="text-[10px] font-black uppercase tracking-widest">Delivery Details</span>
+          <div className={`flex items-center gap-2 ${step === 'order_info' ? 'text-black dark:text-white' : 'text-gray-300'}`}>
+            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black ${step === 'order_info' ? 'bg-black text-white dark:bg-white dark:text-black' : 'bg-gray-100 dark:bg-slate-800'}`}>2</span>
+            <span className="text-[10px] font-black uppercase tracking-widest">Order Info</span>
           </div>
         </div>
 
         {step === 'cart' ? (
           <div className="animate-in fade-in slide-in-from-right-4 duration-500">
-            {/* PROGRESS BAR */}
-            <div className="mb-12 bg-gray-50 dark:bg-slate-900/50 p-6 rounded-3xl border border-gray-100 dark:border-slate-800">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-[var(--primary-color)]/10 rounded-xl flex items-center justify-center text-[var(--primary-color)]">
-                    <Truck size={20} />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight">
-                      {cartTotal >= freeShippingThreshold ? "You've unlocked FREE Shipping!" : "Almost there..."}
-                    </h3>
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-0.5">
-                      {cartTotal >= freeShippingThreshold 
-                        ? "Your order will be delivered at no extra cost" 
-                        : `Add ${formatPrice(freeShippingThreshold - cartTotal)} more for free delivery`}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="h-2 w-full bg-gray-200 dark:bg-slate-800 rounded-full overflow-hidden p-0.5">
-                <div 
-                  className="h-full bg-[var(--primary-color)] rounded-full transition-all duration-1000" 
-                  style={{ width: `${progressToFreeShipping}%` }}
-                />
-              </div>
-            </div>
+
 
             <div className="space-y-6">
               <div className="flex items-center justify-between">
@@ -181,10 +167,17 @@ const CartPage = () => {
                   <span className="text-5xl font-black tracking-tighter">{formatPrice(cartTotal)}</span>
                 </div>
                 <button 
-                  onClick={() => { setStep('delivery'); window.scrollTo(0,0); }}
+                  onClick={() => {
+                    if (storeSettings.requireLoginForCheckout !== false && !isAuthenticated) {
+                      navigate('/login', { state: { from: '/cart' } });
+                    } else {
+                      setStep('order_info');
+                      window.scrollTo(0, 0);
+                    }
+                  }}
                   className="w-full md:w-auto bg-[var(--primary-color)] text-white px-10 py-6 rounded-full font-black uppercase text-xs tracking-[0.2em] flex items-center justify-center gap-4 hover:scale-105 transition-all shadow-xl shadow-[var(--primary-color)]/30 active:scale-95"
                 >
-                  Enter Delivery Details <ArrowRight size={20} />
+                  Continue to Order <ArrowRight size={20} />
                 </button>
               </div>
             </div>
@@ -204,8 +197,8 @@ const CartPage = () => {
                   <MapPin size={32} />
                 </div>
                 <div>
-                  <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter italic">Delivery <span className="text-blue-500">Destination</span></h2>
-                  <p className="text-xs font-black text-gray-400 uppercase tracking-widest mt-1">Provide your details for WhatsApp checkout</p>
+                  <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter italic">Order <span className="text-blue-500">Details</span></h2>
+                  <p className="text-xs font-black text-gray-400 uppercase tracking-widest mt-1">Provide your contact info to chat on WhatsApp</p>
                 </div>
               </div>
 
@@ -222,25 +215,36 @@ const CartPage = () => {
                   />
                 </div>
                 <div className="space-y-4">
-                  <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 ml-2">Location / Neighborhood</label>
+                  <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 ml-2">WhatsApp Phone Number</label>
+                  <input 
+                    type="tel" 
+                    name="phone"
+                    value={customerDetails.phone}
+                    onChange={handleInputChange}
+                    placeholder="e.g. 699 99 99 99"
+                    className="w-full bg-gray-50 dark:bg-slate-950 border-2 border-transparent focus:border-blue-500 rounded-3xl py-6 px-8 text-lg font-bold text-gray-900 dark:text-white outline-none transition-all shadow-inner"
+                  />
+                </div>
+                <div className="space-y-4 md:col-span-2">
+                  <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 ml-2">Current Location / Pickup Point</label>
                   <input 
                     type="text" 
                     name="location"
                     value={customerDetails.location}
                     onChange={handleInputChange}
-                    placeholder="e.g. Douala, Bonapriso"
+                    placeholder="e.g. Douala, Akwa"
                     className="w-full bg-gray-50 dark:bg-slate-950 border-2 border-transparent focus:border-blue-500 rounded-3xl py-6 px-8 text-lg font-bold text-gray-900 dark:text-white outline-none transition-all shadow-inner"
                   />
                 </div>
               </div>
 
               <div className="space-y-4">
-                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 ml-2">Special Notes for Delivery (Optional)</label>
+                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 ml-2">Special Instructions (Optional)</label>
                 <textarea 
                   name="notes"
                   value={customerDetails.notes}
                   onChange={handleInputChange}
-                  placeholder="Tell us more about your location or preferred delivery time..."
+                  placeholder="Tell us more about your order or preferred pickup time..."
                   className="w-full bg-gray-50 dark:bg-slate-950 border-2 border-transparent focus:border-blue-500 rounded-[3rem] py-8 px-10 text-lg font-bold text-gray-900 dark:text-white outline-none transition-all h-48 resize-none shadow-inner"
                 />
               </div>
@@ -259,7 +263,7 @@ const CartPage = () => {
                 </button>
                 {!isDetailsValid && (
                   <p className="text-center text-[10px] font-black text-red-500 uppercase tracking-widest mt-6 animate-pulse">
-                    * Please fill in your name and location to proceed
+                    * Please fill in your name, phone and location to proceed
                   </p>
                 )}
               </div>
@@ -271,11 +275,11 @@ const CartPage = () => {
         <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 opacity-40 grayscale hover:grayscale-0 transition-all duration-700">
           <div className="flex flex-col items-center text-center gap-3">
             <ShieldCheck size={32} />
-            <span className="text-[10px] font-black uppercase tracking-widest">Secure Pay</span>
+            <span className="text-[10px] font-black uppercase tracking-widest">Secure Chat</span>
           </div>
           <div className="flex flex-col items-center text-center gap-3">
-            <Truck size={32} />
-            <span className="text-[10px] font-black uppercase tracking-widest">Global Shipping</span>
+            <MessageCircle size={32} />
+            <span className="text-[10px] font-black uppercase tracking-widest">Live Support</span>
           </div>
           <div className="flex flex-col items-center text-center gap-3">
             <Lock size={32} />
@@ -283,7 +287,7 @@ const CartPage = () => {
           </div>
           <div className="flex flex-col items-center text-center gap-3">
             <CreditCard size={32} />
-            <span className="text-[10px] font-black uppercase tracking-widest">COD Available</span>
+            <span className="text-[10px] font-black uppercase tracking-widest">Cash on Pickup</span>
           </div>
         </div>
       </div>

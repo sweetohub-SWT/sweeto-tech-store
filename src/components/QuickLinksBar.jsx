@@ -1,37 +1,40 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { TrendingUp, Sparkles, Star, Tag } from 'lucide-react';
+import { useLocale } from '../contexts/LocaleContext';
 
 const QuickLinksBar = () => {
+  const { t } = useLocale();
+
   const quickLinks = [
     {
       id: 'best-sellers',
-      label: 'Best Sellers',
-      sub: 'Shop Now',
+      label: t('bestSellers'),
+      sub: t('shopNow'),
       icon: TrendingUp,
       color: 'bg-orange-100 text-orange-500',
       href: '/search',
     },
     {
       id: 'new-arrivals',
-      label: 'New Arrivals',
-      sub: 'Shop Now',
+      label: t('newArrivals'),
+      sub: t('shopNow'),
       icon: Sparkles,
       color: 'bg-[var(--primary-color)]/10 text-[var(--primary-color)]',
       href: '/search',
     },
     {
       id: 'top-rated',
-      label: 'Top Rated',
-      sub: 'Shop Now',
+      label: t('topRated'),
+      sub: t('shopNow'),
       icon: Star,
       color: 'bg-purple-100 text-purple-500',
       href: '/search',
     },
     {
       id: 'on-sale',
-      label: 'On Sale',
-      sub: 'Shop Now',
+      label: t('onSale'),
+      sub: t('shopNow'),
       icon: Tag,
       color: 'bg-green-100 text-green-500',
       href: '/search',

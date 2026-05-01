@@ -6,9 +6,11 @@ import {
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useStoreData } from '../contexts/StoreDataContext';
+import { useLocale } from '../contexts/LocaleContext';
 
 const CategorySidebar = () => {
   const { categories, products } = useStoreData();
+  const { t } = useLocale();
   const [isHovered, setIsHovered] = useState(false);
   const [activeDept, setActiveDept] = useState(null);
   const [isQROpen, setIsQROpen] = useState(false);
@@ -99,7 +101,7 @@ const CategorySidebar = () => {
           <span className={`ml-4 text-slate-900 dark:text-white text-lg font-black tracking-tight whitespace-nowrap transition-all duration-500 ${
             isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 pointer-events-none'
           }`}>
-            Categories
+            {t('categories')}
           </span>
         </div>
       </div>
@@ -130,7 +132,9 @@ const CategorySidebar = () => {
             <span className={`flex-grow text-[15px] font-bold transition-all duration-500 whitespace-nowrap overflow-hidden ${
               isHovered ? 'opacity-100 ml-4 max-w-[200px]' : 'opacity-0 max-w-0'
             } ${activeDept === dept.name ? 'text-black dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}>
-              {dept.name}
+              {dept.name === 'Computers' ? t('computers') : 
+               dept.name === 'Electronics' ? t('electronics') : 
+               dept.name === 'Accessories' ? t('accessories') : dept.name}
             </span>
 
             {/* Chevron */}
@@ -157,8 +161,12 @@ const CategorySidebar = () => {
                 {activeDeptData.icon}
               </div>
               <div className="flex flex-col">
-                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#E31E1E] mb-1">Department</span>
-                <h4 className="text-3xl font-black text-black dark:text-white tracking-tighter leading-none">{activeDeptData.name}</h4>
+                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#E31E1E] mb-1">{t('department')}</span>
+                <h4 className="text-3xl font-black text-black dark:text-white tracking-tighter leading-none">
+                  {activeDeptData.name === 'Computers' ? t('computers') : 
+                   activeDeptData.name === 'Electronics' ? t('electronics') : 
+                   activeDeptData.name === 'Accessories' ? t('accessories') : activeDeptData.name}
+                </h4>
               </div>
             </div>
 
@@ -177,9 +185,9 @@ const CategorySidebar = () => {
                 ))
               ) : (
                 <div className="flex flex-col gap-4">
-                  <span className="text-sm text-gray-400 font-medium">No specialized collections found.</span>
+                  <span className="text-sm text-gray-400 font-medium">{t('noProducts')}</span>
                   <Link to={activeDeptData.path} className="text-[#E31E1E] text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                    Browse All Gear <ChevronRight size={12} />
+                    {t('browseAllGear')} <ChevronRight size={12} />
                   </Link>
                 </div>
               )}
@@ -201,7 +209,7 @@ const CategorySidebar = () => {
           <QrCode size={22} className="shrink-0" />
           <span className={`font-black text-sm uppercase tracking-widest whitespace-nowrap transition-all duration-500 ${
             isHovered ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden'
-          }`}>Share Store</span>
+          }`}>{t('shareStore')}</span>
         </button>
       </div>
 
@@ -234,9 +242,9 @@ const CategorySidebar = () => {
               <Sparkles className="absolute -top-1 -right-1 text-yellow-400" size={16} />
             </div>
           </div>
-          <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-2 italic uppercase tracking-tight relative z-10">Share Store</h2>
+          <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-2 italic uppercase tracking-tight relative z-10">{t('shareStore')}</h2>
           <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-8 px-4 relative z-10">
-            Let others discover our premium electronics collection
+            {t('shareStoreDesc')}
           </p>
           <div className="flex justify-center mb-8 relative z-10">
             <div className="p-5 bg-white rounded-3xl shadow-xl shadow-[var(--primary-color)]/10 border border-[var(--primary-color)]/20">
@@ -244,7 +252,7 @@ const CategorySidebar = () => {
             </div>
           </div>
           <div className="bg-gray-50 dark:bg-slate-950 border border-gray-100 dark:border-slate-800 rounded-2xl px-5 py-4 relative z-10">
-            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Store Link</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">{t('storeLink')}</p>
             <p className="text-sm font-bold text-[var(--primary-color)] break-all select-all">{storeUrl}</p>
           </div>
         </div>

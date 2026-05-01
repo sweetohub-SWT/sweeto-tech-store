@@ -1,8 +1,118 @@
 {
-  "visits": [],
-  "products": [],
-  "categories": [],
-  "storeSettings": [],
+  "products": [
+    {
+      "id": "p1",
+      "name": "Apple MacBook Pro M3 Max",
+      "price": 2899,
+      "originalPrice": 3299,
+      "image": "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/mbp14-spacegray-select-202310?wid=904&hei=840&fmt=jpeg&qlt=90&.v=1697311054290",
+      "description": "The most powerful MacBook ever. Featuring the M3 Max chip, a stunning Liquid Retina XDR display, and up to 22 hours of battery life.",
+      "categoryId": "c1",
+      "status": "active",
+      "featured": true,
+      "stockQuantity": 15
+    },
+    {
+      "id": "p2",
+      "name": "Sony WH-1000XM5",
+      "price": 349,
+      "originalPrice": 399,
+      "image": "https://www.sony.net/electronics/support/res/images/v1/a57041f021e1d3e8e16d4c06f337852c.jpg",
+      "description": "Industry-leading noise canceling with Auto NC Optimizer and exceptional call quality.",
+      "categoryId": "c11",
+      "status": "active",
+      "featured": true,
+      "stockQuantity": 25
+    },
+    {
+      "id": "p3",
+      "name": "Sony Bravia XR A95K QD-OLED",
+      "price": 2499,
+      "originalPrice": 2999,
+      "image": "https://m.media-amazon.com/images/I/81+m1pZ+xPL._AC_SL1500_.jpg",
+      "description": "The world's first QD-OLED TV. Vibrant colors, deep blacks, and the Cognitive Processor XR for the ultimate home theater experience.",
+      "categoryId": "c17",
+      "status": "active",
+      "featured": true,
+      "stockQuantity": 10
+    },
+    {
+      "id": "p4",
+      "name": "JBL PartyBox 310",
+      "price": 549,
+      "originalPrice": 599,
+      "image": "https://m.media-amazon.com/images/I/71u9S+9xTLL._AC_SL1500_.jpg",
+      "description": "Powerful JBL Pro Sound with 240W output. Mesmerizing light show that dances to the beat. Take it anywhere with built-in wheels.",
+      "categoryId": "c18",
+      "status": "active",
+      "featured": true,
+      "stockQuantity": 20
+    },
+    {
+      "id": "p5",
+      "name": "Samsung Bespoke 4-Door Flex",
+      "price": 3199,
+      "originalPrice": 3499,
+      "image": "https://m.media-amazon.com/images/I/71N1u8y9z0L._AC_SL1500_.jpg",
+      "description": "Premium 4-door refrigerator with customizable door panels. Features a Beverage Center and Dual Auto Ice Maker.",
+      "categoryId": "c19",
+      "status": "active",
+      "featured": true,
+      "stockQuantity": 5
+    },
+    {
+      "id": "p6",
+      "name": "iPhone 15 Pro",
+      "price": 999,
+      "originalPrice": 1099,
+      "image": "https://m.media-amazon.com/images/I/81Sig6biNGL._AC_SL1500_.jpg",
+      "description": "The iPhone 15 Pro features a strong and light aerospace-grade titanium design. It also has the A17 Pro chip for next-level performance.",
+      "categoryId": "c20",
+      "status": "active",
+      "featured": true,
+      "stockQuantity": 30
+    }
+  ],
+  "categories": [
+    { "id": "c1", "name": "Laptop", "department": "Computers", "icon": "Laptop" },
+    { "id": "c11", "name": "HEADPONES", "department": "Accessories", "icon": "Headphones" },
+    { "id": "c12", "name": "EXTERNAL CASE", "department": "Accessories", "icon": "Box" },
+    { "id": "c13", "name": "EARBUDS", "department": "Accessories", "icon": "Ear" },
+    { "id": "c14", "name": "SMART-WATCH", "department": "Accessories", "icon": "Watch" },
+    { "id": "c15", "name": "DRIVES", "department": "Accessories", "icon": "HardDrive" },
+    { "id": "c16", "name": "MEMORY", "department": "Accessories", "icon": "Cpu" },
+    { "id": "c17", "name": "Home Cinema", "department": "Electronics", "icon": "Tv" },
+    { "id": "c18", "name": "Speakers", "department": "Electronics", "icon": "Volume2" },
+    { "id": "c19", "name": "Refrigerators", "department": "Electronics", "icon": "Box" },
+    { "id": "c20", "name": "Smartphones", "department": "Electronics", "icon": "Smartphone" }
+  ],
+  "storeSettings": [
+    {
+      "shopName": "SWEETO HUBS",
+      "shopLogo": "/logo.png",
+      "defaultLanguage": "en",
+      "adminLanguage": "en",
+      "defaultCurrency": "XOF",
+      "contactEmail": "",
+      "storeTagline": "YOUR HUB FOR PREMIUM ELECTRONICS",
+      "geminiApiKey": "",
+      "whatsappNumber": "",
+      "shopPhone": "",
+      "shopAddress": "",
+      "facebookUrl": "#",
+      "instagramUrl": "#",
+      "twitterUrl": "#",
+      "id": "main"
+    }
+  ],
   "stockAdjustments": [],
-  "salesRecords": []
+  "salesRecords": [],
+  "visits": [],
+  "video_ads": [],
+  "reviews": [],
+  "notifications": [],
+  "searchLogs": [],
+  "userLogs": [],
+  "subscribers": [],
+  "users": []
 }

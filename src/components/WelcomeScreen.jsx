@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useStoreData } from '../contexts/StoreDataContext';
 import { Package, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { useLocale } from '../contexts/LocaleContext';
 
 const WelcomeScreen = ({ onEnter }) => {
   const { storeSettings } = useStoreData();
+  const { t } = useLocale();
   const [progress, setProgress] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
@@ -123,7 +125,7 @@ const WelcomeScreen = ({ onEnter }) => {
 
           <div className="w-[300px] space-y-4">
             <div className="flex justify-between items-end">
-              <span className="text-[10px] tracking-[2px] text-slate-400 dark:text-white/40 uppercase font-black">Initializing Store...</span>
+              <span className="text-[10px] tracking-[2px] text-slate-400 dark:text-white/40 uppercase font-black">{t('initializingStore')}</span>
               <span className="text-xl font-bold text-slate-900 dark:text-white font-mono">{Math.floor(progress)}%</span>
             </div>
             <div className="h-1.5 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
@@ -144,10 +146,10 @@ const WelcomeScreen = ({ onEnter }) => {
           </div>
           
           <h2 className="text-slate-900 dark:text-white text-4xl md:text-5xl font-bold font-['Playfair_Display'] mb-4 uppercase tracking-[2px]">
-            Ready to Explore
+            {t('readyToExplore')}
           </h2>
           <p className="text-slate-500 dark:text-slate-400 text-base mb-12 max-w-md font-light">
-            Step into the next generation of tech retail. Clean, fast, and professional.
+            {t('welcomeExploreDesc')}
           </p>
 
           <button
@@ -155,7 +157,7 @@ const WelcomeScreen = ({ onEnter }) => {
             className="group relative overflow-hidden bg-[#0066FF] hover:bg-[#0052cc] text-white px-16 py-6 rounded-full font-black uppercase tracking-[4px] text-xs transition-all duration-500 shadow-[0_20px_40px_rgba(0,102,255,0.25)] hover:-translate-y-1 active:scale-95"
           >
             <span className="relative z-10 flex items-center gap-3">
-              Enter Store <ChevronRight className="group-hover:translate-x-1 transition-transform" />
+              {t('enterStore')} <ChevronRight className="group-hover:translate-x-1 transition-transform" />
             </span>
             <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
           </button>

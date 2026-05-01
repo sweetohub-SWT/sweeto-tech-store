@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useStoreData } from '../contexts/StoreDataContext';
+import { useLocale } from '../contexts/LocaleContext';
 import { ChevronLeft, ChevronRight, Zap, PlayCircle } from 'lucide-react';
 import ProductCard from './ProductCard';
 import SectionLayoutWrapper from './SectionLayoutWrapper';
 
 const DealOfTheDay = ({ title, isFirst, showVideoPromo, videoAdId }) => {
   const { products, videoAds, formatPrice } = useStoreData();
+  const { t } = useLocale();
   const [page, setPage] = useState(0);
 
   // Get the most recent active video ad if no specific ID provided
@@ -49,14 +51,18 @@ const DealOfTheDay = ({ title, isFirst, showVideoPromo, videoAdId }) => {
           <div className="flex flex-col items-start">
             <div className="flex items-center gap-6 mb-2">
               <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white uppercase italic tracking-tighter">
-                {title || <>Deals <span className="text-[var(--primary-color)]">of the Day</span></>}
+                {title === 'Deals of the Day' || title === 'Deal Of The Day' || !title ? (
+                  <>{t('dealOfDay')} <span className="text-[var(--primary-color)]"></span></>
+                ) : (
+                  title
+                )}
               </h2>
               <Link to="/search?filter=sale" className="text-[10px] font-black text-white uppercase tracking-[0.2em] hover:opacity-90 transition-opacity bg-[var(--primary-color)] px-4 py-1.5 rounded-full shadow-lg shadow-[rgba(var(--primary-rgb),0.2)]">
-                VIEW ALL
+                {t('viewAll')}
               </Link>
             </div>
             <div className="w-16 h-1.5 bg-[var(--primary-color)] mt-1 mb-6 rounded-full"></div>
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Exclusive daily discounts just for you</p>
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">{t('dealsDesc')}</p>
           </div>
           
           {totalPages > 1 && (

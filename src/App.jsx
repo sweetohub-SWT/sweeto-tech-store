@@ -43,6 +43,11 @@ import CustomerRegisterPage from './pages/CustomerRegisterPage';
 import YouMayLovePage from './pages/YouMayLovePage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
+import PrivacyPage from './pages/PrivacyPage';
+import TermsPage from './pages/TermsPage';
+import SecurityPage from './pages/SecurityPage';
+import CookiesPage from './pages/CookiesPage';
+import CustomerProfilePage from './pages/CustomerProfilePage';
 
 // Admin Pages
 import LoginPage from './pages/admin/LoginPage';
@@ -56,6 +61,8 @@ import AnalyticsPage from './pages/admin/AnalyticsPage';
 import VideoAdsPage from './pages/admin/VideoAdsPage';
 import StorefrontLayoutPage from './pages/admin/StorefrontLayoutPage';
 import ReviewManagerPage from './pages/admin/ReviewManagerPage';
+import HeroManagementPage from './pages/admin/HeroManagementPage';
+import HomeCategoryManagementPage from './pages/admin/HomeCategoryManagementPage';
 
 const ScrollToTop = () => {
   const { storeSettings } = useStoreData();
@@ -151,6 +158,11 @@ function App() {
                   <Route path="/you-may-love" element={<PublicLayout><YouMayLovePage /></PublicLayout>} />
                   <Route path="/about" element={<PublicLayout><AboutPage /></PublicLayout>} />
                   <Route path="/contact" element={<PublicLayout><ContactPage /></PublicLayout>} />
+                  <Route path="/privacy" element={<PublicLayout><PrivacyPage /></PublicLayout>} />
+                  <Route path="/terms" element={<PublicLayout><TermsPage /></PublicLayout>} />
+                  <Route path="/security" element={<PublicLayout><SecurityPage /></PublicLayout>} />
+                  <Route path="/cookies" element={<PublicLayout><CookiesPage /></PublicLayout>} />
+                  <Route path="/profile" element={<PublicLayout><CustomerProfilePage /></PublicLayout>} />
 
                   {/* Admin Routes */}
                   <Route path="/admin/login" element={<LoginPage />} />
@@ -175,6 +187,8 @@ function App() {
                     <Route path="video-ads" element={<VideoAdsPage />} />
                     <Route path="layout" element={<StorefrontLayoutPage />} />
                     <Route path="reviews" element={<ReviewManagerPage />} />
+                    <Route path="hero" element={<HeroManagementPage />} />
+                    <Route path="home-categories" element={<HomeCategoryManagementPage />} />
                   </Route>
 
                   {/* Universal Fallback */}

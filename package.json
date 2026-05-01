@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host",
+    "dev": "vite --host --port 5173",
     "build": "vite build",
     "start": "serve -s dist",
     "lint": "eslint .",
@@ -12,7 +12,6 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
-    "@supabase/supabase-js": "^2.105.1",
     "lucide-react": "^1.8.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.4",

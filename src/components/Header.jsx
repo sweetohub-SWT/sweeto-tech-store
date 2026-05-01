@@ -14,12 +14,13 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [activeMobileTab, setActiveMobileTab] = useState('categories');
+  const [isLangOpen, setIsLangOpen] = useState(false);
 
   const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1024);
 
   const { cartCount, cartTotal, openCart } = useCart();
   const { wishlistCount, openWishlist } = useWishlist();
-  const { t } = useLocale();
+  const { language, setLanguage, t } = useLocale();
   const { storeSettings, categories, products, formatPrice } = useStoreData();
   const { isDarkMode, toggleDarkMode, updatePrimaryTheme, primaryColor } = useTheme();
   const { user, isAuthenticated, isAdmin, logout } = useUserAuth();
@@ -112,10 +113,10 @@ const Header = () => {
 
             {/* Desktop Nav */}
             <nav className="hidden xl:flex items-center space-x-6 text-[12px] font-black uppercase tracking-widest text-gray-500">
-              <Link to="/" className="hover:text-[var(--primary-color)] transition-colors">Home</Link>
-              <Link to="/category/Computers" className="hover:text-[var(--primary-color)] transition-colors">Computers</Link>
-              <Link to="/category/Electronics" className="hover:text-[var(--primary-color)] transition-colors">Electronics</Link>
-              <Link to="/category/Accessories" className="hover:text-[var(--primary-color)] transition-colors">Accessories</Link>
+              <Link to="/" className="hover:text-[var(--primary-color)] transition-colors">{t('home')}</Link>
+              <Link to="/category/Computers" className="hover:text-[var(--primary-color)] transition-colors">{t('computers')}</Link>
+              <Link to="/category/Electronics" className="hover:text-[var(--primary-color)] transition-colors">{t('electronics')}</Link>
+              <Link to="/category/Accessories" className="hover:text-[var(--primary-color)] transition-colors">{t('accessories')}</Link>
             </nav>
           </div>
 
@@ -126,7 +127,7 @@ const Header = () => {
 
                 <input
                   type="text"
-                  placeholder="Search for products"
+                  placeholder={t('searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="flex-1 px-5 py-2 bg-transparent outline-none text-gray-900 dark:text-white placeholder-gray-400 text-sm"
@@ -156,43 +157,99 @@ const Header = () => {
             {/* Customer Account */}
             {isAuthenticated ? (
               <div className="hidden sm:flex items-center group relative">
-                <button className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-[var(--primary-color)] transition-colors">
+                <button 
+                  onClick={() => navigate('/profile')}
+                  className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-[var(--primary-color)] transition-colors"
+                >
                   <User size={24} strokeWidth={1.5} />
                   <div className="text-left hidden lg:block">
-                    <p className="text-[10px] leading-tight font-medium text-gray-400 uppercase">Account</p>
-                    <p className="text-xs font-bold uppercase tracking-wider">{isAdmin ? 'Admin' : (user?.displayName?.split(' ')[0] || 'User')}</p>
+                    <p className="text-[10px] leading-tight font-medium text-gray-400 uppercase">{t('account')}</p>
+                    <p className="text-xs font-bold uppercase tracking-wider">{isAdmin ? t('admin') : (user?.displayName?.split(' ')[0] || t('user'))}</p>
                   </div>
                 </button>
-                <div className="absolute top-10 right-0 w-56 bg-white dark:bg-slate-900 shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-gray-100 dark:border-slate-800 rounded-3xl p-3 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all transform origin-top-right scale-95 group-hover:scale-100 z-50">
-                  <div className="px-4 py-3 mb-2 border-b border-gray-50 dark:border-slate-800">
-                    <p className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-widest">{user?.displayName || 'User'}</p>
-                    <p className="text-[10px] text-gray-400 truncate">{user?.email}</p>
-                  </div>
+                <div className="absolute top-full right-0 pt-3 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all transform origin-top-right scale-95 group-hover:scale-100 z-50">
+                  <div className="w-56 bg-white dark:bg-slate-900 shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-gray-100 dark:border-slate-800 rounded-[2rem] p-3 overflow-hidden">
+                    <div className="px-4 py-3 mb-2 border-b border-gray-50 dark:border-slate-800">
+                      <p className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-widest">{user?.displayName || t('user')}</p>
+                      <p className="text-[10px] text-gray-400 truncate">{user?.email}</p>
+                    </div>
 
-                  {isAdmin && (
-                    <Link to="/admin" className="w-full text-left px-4 py-3 text-xs font-black uppercase tracking-widest text-[var(--primary-color)] hover:bg-[var(--primary-color)]/10 rounded-2xl flex items-center gap-3 transition-colors mb-1">
-                      <Package size={16} /> Admin Panel
+                    <Link 
+                      to="/profile" 
+                      className="w-full text-left px-4 py-3 text-xs font-black uppercase tracking-widest text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-2xl flex items-center gap-3 transition-colors mb-1"
+                    >
+                      <Settings size={16} /> {t('mySettings')}
                     </Link>
-                  )}
 
-                  <button onClick={logout} className="w-full text-left px-4 py-3 text-xs font-black uppercase tracking-widest text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-2xl flex items-center gap-3 transition-colors">
-                    <LogOut size={16} /> Sign out
-                  </button>
+                    {isAdmin && (
+                      <Link 
+                        to="/admin" 
+                        className="w-full text-left px-4 py-3 text-xs font-black uppercase tracking-widest text-[var(--primary-color)] hover:bg-[var(--primary-color)]/10 rounded-2xl flex items-center gap-3 transition-colors mb-1"
+                      >
+                        <Package size={16} /> {t('adminPanel')}
+                      </Link>
+                    )}
+
+                    <button 
+                      onClick={logout} 
+                      className="w-full text-left px-4 py-3 text-xs font-black uppercase tracking-widest text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-2xl flex items-center gap-3 transition-colors"
+                    >
+                      <LogOut size={16} /> {t('signOut')}
+                    </button>
+                  </div>
                 </div>
               </div>
             ) : (
               <Link to="/login" className="hidden sm:flex items-center text-gray-700 dark:text-gray-300 hover:text-[var(--primary-color)] transition-colors gap-2">
                 <User size={24} strokeWidth={1.5} />
-                <span className="text-xs font-bold uppercase hidden lg:block text-nowrap">Sign In</span>
+                <span className="text-xs font-bold uppercase hidden lg:block text-nowrap">{t('signIn')}</span>
               </Link>
             )}
+
+            {/* Language Switcher */}
+            <div className="hidden sm:block relative group">
+              <button
+                onClick={() => setIsLangOpen(!isLangOpen)}
+                className="flex items-center gap-1.5 text-gray-700 dark:text-gray-300 hover:text-[var(--primary-color)] transition-colors p-2 rounded-xl bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-800"
+              >
+                <Globe size={18} strokeWidth={1.5} />
+                <span className="text-[10px] font-black uppercase tracking-widest">{language}</span>
+              </button>
+              
+              {isLangOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setIsLangOpen(false)}></div>
+                  <div className="absolute top-full right-0 mt-3 w-48 bg-white dark:bg-slate-900 shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-gray-100 dark:border-slate-800 rounded-3xl p-2 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                    {[
+                      { code: 'en', name: 'English', flag: '🇺🇸' },
+                      { code: 'es', name: 'Español', flag: '🇪🇸' },
+                      { code: 'fr', name: 'Français', flag: '🇫🇷' },
+                      { code: 'ar', name: 'العربية', flag: '🇸🇦' },
+                      { code: 'pt', name: 'Português', flag: '🇵🇹' }
+                    ].map((lang) => (
+                      <button
+                        key={lang.code}
+                        onClick={() => { setLanguage(lang.code); setIsLangOpen(false); }}
+                        className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${language === lang.code ? 'bg-[var(--primary-color)] text-white' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
+                      >
+                        <span className="flex items-center gap-3">
+                          <span className="text-sm">{lang.flag}</span>
+                          {lang.name}
+                        </span>
+                        {language === lang.code && <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></div>}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
 
             {/* Dark Mode Toggle */}
             <button
               onClick={toggleDarkMode}
-              className="hidden sm:flex items-center text-gray-700 dark:text-gray-300 hover:text-[var(--primary-color)] transition-colors"
+              className="hidden sm:flex items-center text-gray-700 dark:text-gray-300 hover:text-[var(--primary-color)] transition-colors p-2 rounded-xl bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-800"
             >
-              {isDarkMode ? <Sun size={24} strokeWidth={1.5} /> : <Moon size={24} strokeWidth={1.5} />}
+              {isDarkMode ? <Sun size={18} strokeWidth={1.5} /> : <Moon size={18} strokeWidth={1.5} />}
             </button>
 
             <button
@@ -206,7 +263,7 @@ const Header = () => {
                 </span>
               </div>
               <div className="hidden lg:block text-left">
-                <p className="text-[11px] leading-tight font-medium text-gray-400 uppercase">Cart</p>
+                <p className="text-[11px] leading-tight font-medium text-gray-400 uppercase">{t('cart')}</p>
                 <p className="text-xs font-bold uppercase tracking-wider">{formatPrice(cartTotal || 0)}</p>
               </div>
             </button>
@@ -219,7 +276,7 @@ const Header = () => {
             <form onSubmit={handleSearch} className="relative">
               <input
                 type="text"
-                placeholder="Search products..."
+                placeholder={t('searchPlaceholder')}
                 autoFocus
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -245,7 +302,7 @@ const Header = () => {
         <div className={`absolute top-0 left-0 bottom-0 w-[300px] bg-white dark:bg-slate-900 shadow-2xl transition-transform duration-500 transform ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
           <div className="flex flex-col h-full p-6">
             <div className="flex items-center justify-between mb-6">
-              <span className="text-sm font-black text-gray-400 italic tracking-widest uppercase">Hub Menu</span>
+              <span className="text-sm font-black text-gray-400 italic tracking-widest uppercase">{t('hubMenu')}</span>
               <button
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="p-2 bg-gray-100 dark:bg-slate-800 rounded-xl text-gray-500"
@@ -264,7 +321,7 @@ const Header = () => {
                       : 'text-gray-400'
                     }`}
                 >
-                  Categories
+                  {t('categoriesTab')}
                   {activeMobileTab === 'categories' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-red-600"></div>}
                 </button>
                 <button
@@ -274,7 +331,7 @@ const Header = () => {
                       : 'text-gray-400'
                     }`}
                 >
-                  Menu
+                  {t('menuTab')}
                   {activeMobileTab === 'menu' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-red-600"></div>}
                 </button>
               </div>
@@ -302,10 +359,10 @@ const Header = () => {
                   ) : (
                     <>
                       <Link to="/category/Computers" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between p-5 bg-gray-50 dark:bg-slate-800/50 rounded-2xl text-gray-900 dark:text-white font-bold uppercase text-[11px] tracking-widest">
-                        Computers <ChevronDown size={14} className="-rotate-90 text-gray-400" />
+                        {t('computers')} <ChevronDown size={14} className="-rotate-90 text-gray-400" />
                       </Link>
                       <Link to="/category/Electronics" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between p-5 bg-gray-50 dark:bg-slate-800/50 rounded-2xl text-gray-900 dark:text-white font-bold uppercase text-[11px] tracking-widest">
-                        Electronics <ChevronDown size={14} className="-rotate-90 text-gray-400" />
+                        {t('electronics')} <ChevronDown size={14} className="-rotate-90 text-gray-400" />
                       </Link>
                     </>
                   )}
@@ -313,50 +370,79 @@ const Header = () => {
               ) : (
                 <>
                   <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between p-5 bg-gray-50 dark:bg-slate-800/50 rounded-2xl text-gray-900 dark:text-white font-bold uppercase text-[11px] tracking-widest border border-transparent hover:border-[var(--primary-color)]/20 transition-all">
-                    Home <ChevronDown size={14} className="-rotate-90 text-gray-400" />
+                    {t('home')} <ChevronDown size={14} className="-rotate-90 text-gray-400" />
                   </Link>
 
                   <button
                     onClick={() => { openWishlist(); setIsMobileMenuOpen(false); }}
                     className="flex items-center justify-between p-5 bg-gray-50 dark:bg-slate-800/50 rounded-2xl text-gray-900 dark:text-white font-bold uppercase text-[11px] tracking-widest text-left border border-transparent hover:border-red-500/20 transition-all"
                   >
-                    My Wishlist <Heart size={14} className="text-red-500" />
+                    {t('myWishlist')} <Heart size={14} className="text-red-500" />
                   </button>
 
                   <Link to="/about" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between p-5 bg-gray-50 dark:bg-slate-800/50 rounded-2xl text-gray-900 dark:text-white font-bold uppercase text-[11px] tracking-widest border border-transparent hover:border-[var(--primary-color)]/20 transition-all">
-                    About Us <ChevronDown size={14} className="-rotate-90 text-gray-400" />
+                    {t('aboutUs')} <ChevronDown size={14} className="-rotate-90 text-gray-400" />
                   </Link>
 
                   <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between p-5 bg-gray-50 dark:bg-slate-800/50 rounded-2xl text-gray-900 dark:text-white font-bold uppercase text-[11px] tracking-widest border border-transparent hover:border-[var(--primary-color)]/20 transition-all">
-                    Contact Us <ChevronDown size={14} className="-rotate-90 text-gray-400" />
+                    {t('contactUs')} <ChevronDown size={14} className="-rotate-90 text-gray-400" />
                   </Link>
+
+                  {/* Mobile Language Switcher */}
+                  <div className="p-2 bg-gray-50 dark:bg-slate-800/50 rounded-3xl border border-transparent hover:border-[var(--primary-color)]/20 transition-all">
+                    <p className="px-4 pt-3 pb-2 text-[8px] font-black text-gray-400 uppercase tracking-[0.2em]">{t('selectLanguage')}</p>
+                    <div className="grid grid-cols-2 gap-1 p-1">
+                      {[
+                        { code: 'en', flag: '🇺🇸', label: 'English' },
+                        { code: 'es', flag: '🇪🇸', label: 'Español' },
+                        { code: 'fr', flag: '🇫🇷', label: 'Français' },
+                        { code: 'ar', flag: '🇸🇦', label: 'العربية' },
+                        { code: 'pt', flag: '🇵🇹', label: 'Português' }
+                      ].map((lang) => (
+                        <button
+                          key={lang.code}
+                          onClick={() => { setLanguage(lang.code); setIsMobileMenuOpen(false); }}
+                          className={`flex items-center gap-2 px-3 py-2.5 rounded-xl transition-all ${language === lang.code ? 'bg-[var(--primary-color)] text-white' : 'bg-white dark:bg-slate-900 text-gray-500 hover:text-gray-900 dark:hover:text-white'}`}
+                        >
+                          <span className="text-xs">{lang.flag}</span>
+                          <span className="text-[9px] font-black uppercase tracking-widest">{lang.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
                   {/* Mobile Dark Mode Toggle */}
                   <button
                     onClick={toggleDarkMode}
                     className="flex items-center justify-between p-5 bg-gray-50 dark:bg-slate-800/50 rounded-2xl text-gray-900 dark:text-white font-bold uppercase text-[11px] tracking-widest"
                   >
-                    {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+                    {isDarkMode ? t('lightMode') : t('darkMode')}
                     {isDarkMode ? <Sun size={14} /> : <Moon size={14} />}
                   </button>
 
                   {isAuthenticated ? (
                     <>
+                      <button
+                        onClick={() => { navigate('/profile'); setIsMobileMenuOpen(false); }}
+                        className="flex items-center justify-between p-5 bg-gray-50 dark:bg-slate-800/50 rounded-2xl text-gray-900 dark:text-white font-bold uppercase text-[11px] tracking-widest mt-4 border border-transparent hover:border-[var(--primary-color)]/20 transition-all"
+                      >
+                        {t('myProfile')} <User size={16} />
+                      </button>
                       {isAdmin && (
                         <Link to="/admin" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between p-5 bg-[var(--primary-color)] text-white rounded-2xl font-bold uppercase text-[11px] tracking-widest mt-4 shadow-lg shadow-[var(--primary-color)]/20">
-                          Admin Panel <Package size={16} />
+                          {t('adminPanel')} <Package size={16} />
                         </Link>
                       )}
                       <button
                         onClick={() => { logout(); setIsMobileMenuOpen(false); }}
                         className="flex items-center justify-between p-5 bg-red-50 dark:bg-red-900/10 text-red-600 rounded-2xl font-bold uppercase text-[11px] tracking-widest mt-2"
                       >
-                        Sign Out <LogOut size={16} />
+                        {t('signOut')} <LogOut size={16} />
                       </button>
                     </>
                   ) : (
                     <Link to="/login" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between p-5 bg-[var(--primary-color)] text-white rounded-2xl font-bold uppercase text-[11px] tracking-widest mt-4 shadow-lg shadow-[var(--primary-color)]/20">
-                      Sign In <User size={16} />
+                      {t('signIn')} <User size={16} />
                     </Link>
                   )}
                 </>
@@ -365,11 +451,11 @@ const Header = () => {
 
             <div className="mt-auto pt-10">
               <div className="p-6 bg-slate-950 rounded-3xl border border-slate-800">
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--primary-color)] mb-2">Customer Support</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--primary-color)] mb-2">{t('customerSupport')}</p>
                 <p className="text-white font-black text-sm tracking-tight mb-4">{storeSettings.shopPhone || '+1-800-SWEETO'}</p>
                 <div className="h-px bg-slate-800 mb-4"></div>
                 <p className="text-gray-400 text-[10px] leading-relaxed">
-                  Need help with your order? Our team is available 24/7.
+                  {t('supportDesc')}
                 </p>
               </div>
             </div>

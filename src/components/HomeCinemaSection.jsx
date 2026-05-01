@@ -1,5 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useStoreData } from '../contexts/StoreDataContext';
+import { useLocale } from '../contexts/LocaleContext';
 import ProductCard from './ProductCard';
 import { Link } from 'react-router-dom';
 
@@ -7,6 +8,7 @@ import SectionLayoutWrapper from './SectionLayoutWrapper';
 
 const HomeCinemaSection = ({ title, showVideoPromo, videoAdId }) => {
   const { products } = useStoreData();
+  const { t } = useLocale();
 
   // Filter products for "Home Cinema" section ONLY if explicitly flagged
   const cinemaProducts = useMemo(() => {
@@ -25,10 +27,14 @@ const HomeCinemaSection = ({ title, showVideoPromo, videoAdId }) => {
           <div className="flex flex-col items-start">
             <div className="flex items-center gap-6 mb-2">
               <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white uppercase italic tracking-tighter">
-                {title || <>Home <span className="text-[var(--primary-color)]">Cinema</span></>}
+                {title === 'Home Cinema' || !title ? (
+                  <>{t('homeCinema')} <span className="text-[var(--primary-color)]"></span></>
+                ) : (
+                  title
+                )}
               </h2>
               <Link to="/search?q=home cinema" className="text-[10px] font-black text-white uppercase tracking-[0.2em] hover:opacity-90 transition-opacity bg-[var(--primary-color)] px-4 py-1.5 rounded-full shadow-lg shadow-[rgba(var(--primary-rgb),0.2)]">
-                EXPLORE
+                {t('viewAll')}
               </Link>
             </div>
             <div className="w-16 h-1.5 bg-[var(--primary-color)] mt-1 mb-6 rounded-full"></div>

@@ -5,11 +5,13 @@ import { Filter, ChevronDown, LayoutGrid, ChevronLeft } from 'lucide-react';
 import { updateSEO } from '../utils/seoHelper';
 import ProductCard from '../components/ProductCard';
 import { getCategoryHeroImage, getCategoryTagline } from '../utils/categoryData';
+import { useLocale } from '../contexts/LocaleContext';
 
 const CategoryPage = () => {
   const { categoryName = '' } = useParams();
   const navigate = useNavigate();
   const { products = [], categories = [] } = useStoreData();
+  const { t } = useLocale();
 
   const [sortBy, setSortBy] = useState('newest');
   const [filterCategory, setFilterCategory] = useState('all');
@@ -138,12 +140,12 @@ const CategoryPage = () => {
               <div className="p-1.5 rounded-full border border-white/20 group-hover:border-white/50 transition-colors">
                 <ChevronLeft size={12} />
               </div>
-              Back
+              {t('back')}
             </button>
 
             <div className="flex items-center gap-4 mb-2">
               <div className="w-8 h-1 bg-[var(--primary-color)] rounded-full"></div>
-              <span className="text-[10px] font-black uppercase tracking-[0.5em] text-[var(--primary-color)]">DEPARTMENT</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.5em] text-[var(--primary-color)]">{t('department')}</span>
             </div>
             
             <h1 className="text-4xl lg:text-8xl font-black text-white tracking-tighter uppercase italic leading-[0.85] mb-6">
@@ -175,7 +177,7 @@ const CategoryPage = () => {
                     <div className="w-10 h-10 rounded-2xl bg-black dark:bg-white flex items-center justify-center text-white dark:text-black shadow-lg">
                       <Filter size={18} />
                     </div>
-                    <h2 className="text-xl font-black uppercase italic tracking-tighter text-gray-900 dark:text-white">Filters</h2>
+                    <h2 className="text-xl font-black uppercase italic tracking-tighter text-gray-900 dark:text-white">{t('filters')}</h2>
                   </div>
                   <div className="px-4 py-1.5 rounded-full bg-gray-100 dark:bg-slate-800 text-[10px] font-black text-gray-500">
                     {categoryProducts.length}
@@ -186,16 +188,16 @@ const CategoryPage = () => {
                 <div className="space-y-10">
                   <div>
                     <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-[var(--primary-color)] mb-8 pl-1">
-                      Browse Segments
+                      {t('browseSegments')}
                     </h3>
                     <div className="flex flex-col gap-3">
-                      {['All Products', ...childCategoryNames.map(n => n.charAt(0).toUpperCase() + n.slice(1))].map((label) => {
-                        const isActive = label === 'All Products' ? filterCategory === 'all' : filterCategory === label.toLowerCase();
+                      {[t('allProducts'), ...childCategoryNames.map(n => n.charAt(0).toUpperCase() + n.slice(1))].map((label) => {
+                        const isActive = label === t('allProducts') ? filterCategory === 'all' : filterCategory === label.toLowerCase();
                         return (
                           <button
                             key={label}
                             onClick={() => {
-                              if (label === 'All Products') {
+                              if (label === t('allProducts')) {
                                 setFilterCategory('all');
                               } else {
                                 setFilterCategory(label.toLowerCase());
@@ -232,11 +234,11 @@ const CategoryPage = () => {
                  </div>
                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
                  <div className="absolute inset-0 p-10 flex flex-col justify-end">
-                    <div className="overflow-hidden mb-2">
-                       <span className="text-[10px] font-black uppercase tracking-[0.5em] text-[var(--primary-color)] block transform translate-y-full group-hover:translate-y-0 transition-transform duration-500">NEW SEASON</span>
+                     <div className="overflow-hidden mb-2">
+                       <span className="text-[10px] font-black uppercase tracking-[0.5em] text-[var(--primary-color)] block transform translate-y-full group-hover:translate-y-0 transition-transform duration-500">{t('newSeason')}</span>
                     </div>
                     <h4 className="text-3xl font-black tracking-tighter uppercase italic leading-[0.8] mb-6">
-                      Explore the <br/>
+                      {t('exploreThe')} <br/>
                       <span className="text-[var(--primary-color)]">PRO</span> LINE
                     </h4>
                     <div className="w-12 h-1 bg-white/20 group-hover:w-full transition-all duration-700"></div>
@@ -248,28 +250,28 @@ const CategoryPage = () => {
           {/* Main Content Area */}
           <main className="lg:col-span-9 min-w-0">
             {/* Context Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 p-8 bg-white dark:bg-slate-900/40 backdrop-blur-md rounded-[2.5rem] border border-white/50 dark:border-slate-800/50 shadow-sm">
-              <div>
-                <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-1">CURRENT SELECTION</h2>
-                <div className="flex items-center gap-2">
-                   <span className="text-2xl font-black uppercase italic tracking-tighter text-gray-900 dark:text-white">
-                     {filterCategory === 'all' ? 'All Inventory' : filterCategory}
-                   </span>
-                </div>
-              </div>
+             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 p-8 bg-white dark:bg-slate-900/40 backdrop-blur-md rounded-[2.5rem] border border-white/50 dark:border-slate-800/50 shadow-sm">
+               <div>
+                 <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-1">{t('currentSelection')}</h2>
+                 <div className="flex items-center gap-2">
+                    <span className="text-2xl font-black uppercase italic tracking-tighter text-gray-900 dark:text-white">
+                      {filterCategory === 'all' ? t('allInventory') : filterCategory}
+                    </span>
+                 </div>
+               </div>
 
               <div className="flex items-center gap-4">
                 <div className="relative group">
                   <select 
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
-                    className="appearance-none bg-[#F8F9FA] dark:bg-slate-800 text-[10px] font-black uppercase tracking-[0.2em] px-8 py-4 pr-12 rounded-2xl border-none outline-none focus:ring-2 focus:ring-[var(--primary-color)] transition-all cursor-pointer shadow-inner"
-                  >
-                    <option value="newest text-gray-900">SORT: NEWEST FIRST</option>
-                    <option value="name">SORT: NAME A-Z</option>
-                    <option value="price-low">SORT: LOWEST PRICE</option>
-                    <option value="price-high">SORT: HIGHEST PRICE</option>
-                  </select>
+                     className="appearance-none bg-[#F8F9FA] dark:bg-slate-800 text-[10px] font-black uppercase tracking-[0.2em] px-8 py-4 pr-12 rounded-2xl border-none outline-none focus:ring-2 focus:ring-[var(--primary-color)] transition-all cursor-pointer shadow-inner"
+                   >
+                     <option value="newest text-gray-900">{t('sortNewest')}</option>
+                     <option value="name">{t('sortName')}</option>
+                     <option value="price-low">{t('sortPriceLow')}</option>
+                     <option value="price-high">{t('sortPriceHigh')}</option>
+                   </select>
                   <ChevronDown size={14} className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 group-hover:text-black dark:group-hover:text-white transition-colors" />
                 </div>
               </div>
@@ -284,17 +286,17 @@ const CategoryPage = () => {
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-32 bg-white dark:bg-slate-900/30 backdrop-blur-sm rounded-[4rem] border border-dashed border-gray-200 dark:border-slate-800">
-                <div className="w-32 h-32 bg-gray-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-8 shadow-inner animate-pulse">
-                  <LayoutGrid size={48} className="text-gray-300" />
-                </div>
-                <h3 className="text-3xl font-black text-gray-900 dark:text-white mb-4 uppercase italic tracking-tighter">Inventory Empty</h3>
-                <p className="text-gray-400 dark:text-slate-500 text-center max-w-sm font-bold uppercase tracking-widest text-[10px] mb-10 px-6">
-                  We are currently curating new arrivals for this department.
-                </p>
-                <Link to="/" className="bg-black dark:bg-white text-white dark:text-black px-12 py-5 rounded-full font-black uppercase text-[10px] tracking-[0.3em] hover:scale-105 transition-all shadow-2xl hover:shadow-black/20">
-                  RETURN TO HOME
-                </Link>
-              </div>
+                 <div className="w-32 h-32 bg-gray-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-8 shadow-inner animate-pulse">
+                   <LayoutGrid size={48} className="text-gray-300" />
+                 </div>
+                 <h3 className="text-3xl font-black text-gray-900 dark:text-white mb-4 uppercase italic tracking-tighter">{t('inventoryEmpty')}</h3>
+                 <p className="text-gray-400 dark:text-slate-500 text-center max-w-sm font-bold uppercase tracking-widest text-[10px] mb-10 px-6">
+                   {t('curatingNewArrivals')}
+                 </p>
+                 <Link to="/" className="bg-black dark:bg-white text-white dark:text-black px-12 py-5 rounded-full font-black uppercase text-[10px] tracking-[0.3em] hover:scale-105 transition-all shadow-2xl hover:shadow-black/20">
+                   {t('returnToHome')}
+                 </Link>
+               </div>
             )}
           </main>
         </div>

@@ -1,36 +1,34 @@
-import { supabase } from './supabaseClient';
+const API_BASE_URL = `http://${window.location.hostname}:3001`;
 
 class ApiService {
   /**
-   * Generic CRUD using Supabase
-   * Tables must exist in your Supabase project with appropriate RLS policies.
+   * Local-disk (via JSON Server) based API service
    */
   async getAll(resource) {
-    const { data, error } = await supabase
-      .from(resource)
-      .select('*');
-    
-    if (error) {
-      console.error(`Supabase: Error fetching all from ${resource}:`, error);
-      // Fallback to local storage if supabase is not configured/available
-      return JSON.parse(localStorage.getItem(`sweeto_tech_db_${resource}`) || '[]');
+    try {
+      const response = await fetch(`${API_BASE_URL}/${resource}`);
+      if (!response.ok) throw new Error('Network response was not ok');
+      const data = await response.json();
+      
+      // Update local storage for "offline" fallback
+      localStorage.setItem(`sweeto_tech_db_${resource}`, JSON.stringify(data));
+      return data;
+    } catch (error) {
+      console.error(`Fetch failed for ${resource}, falling back to localStorage:`, error);
+      const localData = JSON.parse(localStorage.getItem(`sweeto_tech_db_${resource}`) || '[]');
+      return localData;
     }
-    return data;
   }
 
   async getOne(resource, id) {
-    const { data, error } = await supabase
-      .from(resource)
-      .select('*')
-      .eq('id', id)
-      .single();
-    
-    if (error) {
-      console.error(`Supabase: Error fetching one from ${resource}:`, error);
-      const localData = await this.getAll(resource);
-      return localData.find(item => String(item.id) === String(id)) || null;
+    try {
+      const response = await fetch(`${API_BASE_URL}/${resource}/${id}`);
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      const data = await this.getAll(resource);
+      return data.find(item => String(item.id) === String(id)) || null;
     }
-    return data;
   }
 
   async create(resource, itemData) {
@@ -39,66 +37,79 @@ class ApiService {
       id: itemData.id || crypto.randomUUID()
     };
 
-    const { data, error } = await supabase
-      .from(resource)
-      .insert([newItem])
-      .select()
-      .single();
-
-    if (error) {
-      console.error(`Supabase: Error creating in ${resource}:`, error);
-      // Local fallback
+    try {
+      const response = await fetch(`${API_BASE_URL}/${resource}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newItem)
+      });
+      const data = await response.json();
+      
+      // Update local storage
       const localData = await this.getAll(resource);
-      localData.push(newItem);
       localStorage.setItem(`sweeto_tech_db_${resource}`, JSON.stringify(localData));
+      
+      return data;
+    } catch (error) {
+      console.error(`Create failed for ${resource}, using localStorage only:`, error);
+      const data = await this.getAll(resource);
+      data.push(newItem);
+      localStorage.setItem(`sweeto_tech_db_${resource}`, JSON.stringify(data));
       return newItem;
     }
-    return data;
   }
 
   async update(resource, id, updates) {
-    const { data, error } = await supabase
-      .from(resource)
-      .update(updates)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) {
-      console.error(`Supabase: Error updating in ${resource}:`, error);
-      // Local fallback
-      let localData = await this.getAll(resource);
+    try {
+      const response = await fetch(`${API_BASE_URL}/${resource}/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
+      });
+      const data = await response.json();
+      
+      // Update local storage
+      const localData = await this.getAll(resource);
+      localStorage.setItem(`sweeto_tech_db_${resource}`, JSON.stringify(localData));
+      
+      return data;
+    } catch (error) {
+      console.error(`Update failed for ${resource}/${id}, using localStorage only:`, error);
+      let data = await this.getAll(resource);
       let updatedItem = null;
-      localData = localData.map(item => {
+      
+      data = data.map(item => {
         if (String(item.id) === String(id)) {
           updatedItem = { ...item, ...updates };
           return updatedItem;
         }
         return item;
       });
-      localStorage.setItem(`sweeto_tech_db_${resource}`, JSON.stringify(localData));
+      
+      localStorage.setItem(`sweeto_tech_db_${resource}`, JSON.stringify(data));
       return updatedItem;
     }
-    return data;
   }
 
   async delete(resource, id) {
-    const { error } = await supabase
-      .from(resource)
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      console.error(`Supabase: Error deleting from ${resource}:`, error);
-      // Local fallback
-      let localData = await this.getAll(resource);
-      localData = localData.filter(item => String(item.id) !== String(id));
+    try {
+      await fetch(`${API_BASE_URL}/${resource}/${id}`, { method: 'DELETE' });
+      
+      // Update local storage
+      const localData = await this.getAll(resource);
       localStorage.setItem(`sweeto_tech_db_${resource}`, JSON.stringify(localData));
+      
+      return { success: true };
+    } catch (error) {
+      console.error(`Delete failed for ${resource}/${id}, using localStorage only:`, error);
+      let data = await this.getAll(resource);
+      data = data.filter(item => String(item.id) !== String(id));
+      localStorage.setItem(`sweeto_tech_db_${resource}`, JSON.stringify(data));
+      return { success: true };
     }
-    return { success: !error };
   }
 
-  // Synchronous convenience methods (still using localStorage for speed if needed)
+  // Synchronous convenience methods (for initial state)
   getProductsSync() {
     return JSON.parse(localStorage.getItem('sweeto_tech_db_products') || '[]');
   }
@@ -115,7 +126,7 @@ class ApiService {
   async getCategories() { return this.getAll('categories'); }
   
   async getStoreSettings() {
-    const data = await this.getAll('store_settings');
+    const data = await this.getAll('storeSettings');
     return data[0] || null;
   }
 
@@ -123,39 +134,36 @@ class ApiService {
     const currentSettings = await this.getStoreSettings() || { id: 'main' };
     const updatedSettings = { ...currentSettings, ...updates };
     
-    const { data, error } = await supabase
-      .from('store_settings')
-      .upsert(updatedSettings)
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Supabase: Error updating store settings:', error);
+    // If it's a new setup, we might need to create it first
+    try {
+      const existing = await this.getStoreSettings();
+      if (!existing) {
+        return await this.create('storeSettings', updatedSettings);
+      } else {
+        return await this.update('storeSettings', existing.id, updates);
+      }
+    } catch (error) {
+      // Legacy localStorage logic if backend is down
       localStorage.setItem('sweeto_tech_db_storeSettings', JSON.stringify([updatedSettings]));
       return updatedSettings;
     }
-    return data;
   }
 
-  async getSalesRecords() { return this.getAll('sales_records'); }
-  async getStockAdjustments() { return this.getAll('stock_adjustments'); }
+  async getSalesRecords() { return this.getAll('salesRecords'); }
+  async getStockAdjustments() { return this.getAll('stockAdjustments'); }
   async getVisits() { return this.getAll('visits'); }
   async getVideoAds() { return this.getAll('video_ads'); }
   async getReviews() { return this.getAll('reviews'); }
   async getNotifications() { return this.getAll('notifications'); }
-  async getSearchLogs() { return this.getAll('search_logs'); }
-  async getUserLogs() { return this.getAll('user_logs'); }
+  async getSearchLogs() { return this.getAll('searchLogs'); }
+  async getUserLogs() { return this.getAll('userLogs'); }
   async getSubscribers() { return this.getAll('subscribers'); }
 
-  // Legacy compatibility / Mass Migration tool
+  // Database Management
   async importDb(data) {
-    // This will try to push all local data to Supabase
+    // For import, we'd ideally overwrite the server's db.json
+    // But for now, we just update localStorage and let the server handle its own persistence
     for (const resource in data) {
-      const tableName = resource === 'storeSettings' ? 'store_settings' : resource;
-      const { error } = await supabase.from(tableName).upsert(data[resource]);
-      if (error) console.warn(`Import failed for ${resource}:`, error);
-      
-      // Also keep local as backup
       localStorage.setItem(`sweeto_tech_db_${resource}`, JSON.stringify(data[resource]));
     }
     return true;
@@ -163,11 +171,10 @@ class ApiService {
 
   async exportDb() {
     const db = {};
-    const resources = ['products', 'categories', 'sales_records', 'stock_adjustments', 'visits', 'video_ads', 'reviews', 'notifications', 'search_logs', 'user_logs', 'subscribers'];
+    const resources = ['products', 'categories', 'salesRecords', 'stockAdjustments', 'visits', 'video_ads', 'reviews', 'notifications', 'searchLogs', 'userLogs', 'subscribers', 'storeSettings'];
     for (const res of resources) {
       db[res] = await this.getAll(res);
     }
-    db['storeSettings'] = await this.getAll('store_settings');
     return db;
   }
 }

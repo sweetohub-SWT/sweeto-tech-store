@@ -2,9 +2,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useStoreData } from '../contexts/StoreDataContext';
 import { ArrowRight } from 'lucide-react';
+import { useLocale } from '../contexts/LocaleContext';
 
 const CategoryBanners = () => {
   const { categories, products, formatPrice } = useStoreData();
+  const { t } = useLocale();
 
   // Pick up to 3 categories that have products
   const bannerCategories = categories
@@ -56,10 +58,10 @@ const CategoryBanners = () => {
                   {cat.name}
                 </p>
                 {minPrice !== Infinity && (
-                  <p className="text-gray-500 dark:text-gray-400 text-sm">From {formatPrice(minPrice)}</p>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">{t('startingAt')} {formatPrice(minPrice)}</p>
                 )}
                 <div className={`mt-3 inline-flex items-center gap-2 text-white text-[10px] font-black uppercase tracking-widest px-6 py-2.5 rounded-full transition-colors shadow-sm ${buttonColors[i]}`}>
-                  Shop Now <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
+                  {t('shopNow')} <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
 

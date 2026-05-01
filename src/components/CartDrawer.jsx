@@ -1,22 +1,34 @@
 import React, { useState } from 'react';
 import { useCart } from '../contexts/CartContext';
 import { useStoreData } from '../contexts/StoreDataContext';
-import { X, ShoppingBag, Trash2, Minus, Plus, ArrowRight, MessageCircle, MapPin, User, ChevronLeft, CheckCircle2 } from 'lucide-react';
+import { useLocale } from '../contexts/LocaleContext';
+import { X, ShoppingBag, Trash2, Minus, Plus, ArrowRight, MessageCircle, MapPin, User, ChevronLeft, CheckCircle2, Phone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useUserAuth } from '../contexts/UserAuthContext';
 import { getCartWhatsAppLink } from '../utils/whatsappHelper';
 
 const CartDrawer = () => {
   const { isCartOpen, closeCart, cartItems, removeFromCart, updateQuantity, cartTotal } = useCart();
   const { formatPrice, storeSettings } = useStoreData();
+  const { t } = useLocale();
+  const { user, isAuthenticated } = useUserAuth();
   const navigate = useNavigate();
   
   // Steps: 'list', 'details', 'confirm'
   const [step, setStep] = useState('list');
   const [customerDetails, setCustomerDetails] = useState({
     name: '',
+    phone: '',
     location: '',
     notes: ''
   });
+
+  // Pre-fill name from user account
+  React.useEffect(() => {
+    if (user?.display_name) {
+      setCustomerDetails(prev => ({ ...prev, name: user.display_name }));
+    }
+  }, [user]);
 
   const handleWhatsAppCheckout = () => {
     const shopName = storeSettings.shopName || 'SWEETO-HUB';
@@ -46,7 +58,10 @@ const CartDrawer = () => {
     setCustomerDetails(prev => ({ ...prev, [name]: value }));
   };
 
-  const isDetailsValid = customerDetails.name.trim() !== '' && customerDetails.location.trim() !== '';
+  const isDetailsValid = 
+    customerDetails.name.trim() !== '' && 
+    customerDetails.phone.trim() !== '' && 
+    customerDetails.location.trim() !== '';
 
   const renderHeader = () => {
     if (step === 'list') {
@@ -56,7 +71,7 @@ const CartDrawer = () => {
             <ShoppingBag size={20} />
           </div>
           <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter italic">
-            Your <span className="text-[var(--primary-color)]">Bag</span>
+            {t('yourBag').split(' ')[0]} <span className="text-[var(--primary-color)]">{t('yourBag').split(' ').slice(1).join(' ')}</span>
           </h2>
         </div>
       );
@@ -67,7 +82,7 @@ const CartDrawer = () => {
           <ChevronLeft size={20} />
         </button>
         <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter italic">
-          {step === 'details' ? 'Delivery' : 'Review'} <span className="text-[var(--primary-color)]">Order</span>
+          {step === 'details' ? t('orderInfo') : t('reviewDetails')}
         </h2>
       </div>
     );
@@ -99,14 +114,14 @@ const CartDrawer = () => {
                   <ShoppingBag size={32} />
                 </div>
                 <div>
-                  <p className="text-gray-900 dark:text-white font-black uppercase text-sm tracking-widest mb-2">Cart is Empty</p>
-                  <p className="text-gray-400 text-xs leading-relaxed max-w-[200px] mx-auto uppercase font-bold tracking-wider">Start exploring our premium collection</p>
+                  <p className="text-gray-900 dark:text-white font-black uppercase text-sm tracking-widest mb-2">{t('cartEmpty')}</p>
+                  <p className="text-gray-400 text-xs leading-relaxed max-w-[200px] mx-auto uppercase font-bold tracking-wider">{t('cartEmptyDesc')}</p>
                 </div>
                 <button 
                   onClick={() => { navigate('/search'); closeCart(); }}
                   className="bg-slate-900 dark:bg-slate-800 text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] hover:scale-105 transition-all"
                 >
-                  Shop Now
+                  {t('shopNow')}
                 </button>
               </div>
             ) : (
@@ -156,7 +171,7 @@ const CartDrawer = () => {
                   <div className="space-y-6 animate-ai-slide-up">
                     <div className="space-y-4">
                       <div className="relative">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 block">Full Name</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 block">{t('fullName')}</label>
                         <div className="relative group">
                           <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[var(--primary-color)] transition-colors" size={18} />
                           <input 
@@ -164,14 +179,29 @@ const CartDrawer = () => {
                             name="name"
                             value={customerDetails.name}
                             onChange={handleInputChange}
-                            placeholder="e.g. John Doe"
+                            placeholder="John Doe"
                             className="w-full bg-gray-50 dark:bg-slate-950 border-2 border-transparent focus:border-[var(--primary-color)] rounded-2xl py-4 pl-12 pr-6 text-sm font-bold text-gray-900 dark:text-white outline-none transition-all placeholder:text-gray-300 dark:placeholder:text-slate-700"
                           />
                         </div>
                       </div>
 
                       <div className="relative">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 block">Delivery Location</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 block">{t('phoneNumber')}</label>
+                        <div className="relative group">
+                          <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[var(--primary-color)] transition-colors" size={18} />
+                          <input 
+                            type="tel" 
+                            name="phone"
+                            value={customerDetails.phone}
+                            onChange={handleInputChange}
+                            placeholder="699 99 99 99"
+                            className="w-full bg-gray-50 dark:bg-slate-950 border-2 border-transparent focus:border-[var(--primary-color)] rounded-2xl py-4 pl-12 pr-6 text-sm font-bold text-gray-900 dark:text-white outline-none transition-all placeholder:text-gray-300 dark:placeholder:text-slate-700"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="relative">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 block">{t('yourLocation')}</label>
                         <div className="relative group">
                           <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[var(--primary-color)] transition-colors" size={18} />
                           <input 
@@ -179,19 +209,19 @@ const CartDrawer = () => {
                             name="location"
                             value={customerDetails.location}
                             onChange={handleInputChange}
-                            placeholder="e.g. Douala, Bonapriso"
+                            placeholder="Douala, Bonapriso"
                             className="w-full bg-gray-50 dark:bg-slate-950 border-2 border-transparent focus:border-[var(--primary-color)] rounded-2xl py-4 pl-12 pr-6 text-sm font-bold text-gray-900 dark:text-white outline-none transition-all placeholder:text-gray-300 dark:placeholder:text-slate-700"
                           />
                         </div>
                       </div>
 
                       <div className="relative">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 block">Special Notes (Optional)</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 block">{t('specialNotes')}</label>
                         <textarea 
                           name="notes"
                           value={customerDetails.notes}
                           onChange={handleInputChange}
-                          placeholder="e.g. Please call before arrival"
+                          placeholder="Please call before arrival"
                           className="w-full bg-gray-50 dark:bg-slate-950 border-2 border-transparent focus:border-[var(--primary-color)] rounded-2xl py-4 px-6 text-sm font-bold text-gray-900 dark:text-white outline-none transition-all h-32 resize-none placeholder:text-gray-300 dark:placeholder:text-slate-700"
                         />
                       </div>
@@ -199,7 +229,7 @@ const CartDrawer = () => {
                     
                     <div className="p-4 bg-blue-50 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-900/20">
                       <p className="text-[10px] text-blue-600 dark:text-blue-400 font-bold leading-relaxed">
-                        Your details will be used to generate a secure order request on WhatsApp. No payment is required yet.
+                        {t('checkoutDesc')}
                       </p>
                     </div>
                   </div>
@@ -211,21 +241,25 @@ const CartDrawer = () => {
                       <CheckCircle2 size={48} />
                     </div>
                     <div className="space-y-2">
-                      <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Ready to <span className="text-green-500">Order</span></h3>
-                      <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">Review your details below</p>
+                      <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">{t('readyToOrder')}</h3>
+                      <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">{t('reviewDetailsBelow')}</p>
                     </div>
 
                     <div className="bg-gray-50 dark:bg-slate-950 rounded-[2rem] p-6 text-left border border-gray-100 dark:border-slate-800 space-y-4">
                       <div>
-                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">Customer</p>
+                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">{t('fullName')}</p>
                         <p className="text-sm font-black text-gray-900 dark:text-white uppercase">{customerDetails.name}</p>
                       </div>
                       <div>
-                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">Location</p>
+                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">{t('phoneNumber')}</p>
+                        <p className="text-sm font-black text-gray-900 dark:text-white uppercase">{customerDetails.phone}</p>
+                      </div>
+                      <div>
+                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">{t('yourLocation')}</p>
                         <p className="text-sm font-black text-gray-900 dark:text-white uppercase">{customerDetails.location}</p>
                       </div>
                       <div className="pt-4 border-t border-gray-200 dark:border-slate-800">
-                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">Order Total</p>
+                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">{t('orderTotal')}</p>
                         <p className="text-xl font-black text-[var(--primary-color)]">{formatPrice(cartTotal)}</p>
                       </div>
                     </div>
@@ -239,7 +273,7 @@ const CartDrawer = () => {
             <div className="p-6 bg-gray-50 dark:bg-slate-950/50 border-t border-gray-100 dark:border-slate-800 space-y-4">
               <div className="flex justify-between items-end mb-2">
                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
-                  {step === 'list' ? 'Subtotal' : 'Total Payable'}
+                  {step === 'list' ? t('subtotal') : t('totalPayable')}
                 </span>
                 <span className="text-2xl font-black text-gray-900 dark:text-white tracking-tighter">{formatPrice(cartTotal)}</span>
               </div>
@@ -247,10 +281,17 @@ const CartDrawer = () => {
               {step === 'list' ? (
                 <div className="grid grid-cols-1 gap-3">
                   <button 
-                    onClick={() => setStep('details')}
+                    onClick={() => {
+                      if (storeSettings.requireLoginForCheckout !== false && !isAuthenticated) {
+                        closeCart();
+                        navigate('/login', { state: { from: window.location.pathname } });
+                      } else {
+                        setStep('details');
+                      }
+                    }}
                     className="w-full bg-slate-900 dark:bg-white dark:text-slate-900 text-white py-4 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] transition-all hover:opacity-90 flex items-center justify-center gap-2 shadow-xl shadow-slate-900/10"
                   >
-                    Enter Delivery Details <ArrowRight size={14} />
+                    {t('proceedToOrder')} <ArrowRight size={14} />
                   </button>
                 </div>
               ) : step === 'details' ? (
@@ -263,19 +304,19 @@ const CartDrawer = () => {
                       : 'bg-gray-200 text-gray-400 cursor-not-allowed opacity-50'
                   }`}
                 >
-                  Review Order <ArrowRight size={14} />
+                  {t('reviewOrder')} <ArrowRight size={14} />
                 </button>
               ) : (
                 <button 
                   onClick={handleWhatsAppCheckout}
                   className="w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] flex items-center justify-center gap-3 shadow-xl shadow-green-600/20 transition-all hover:-translate-y-0.5 active:scale-95"
                 >
-                  <MessageCircle size={18} /> Confirm on WhatsApp
+                  <MessageCircle size={18} /> {t('confirmOnWhatsApp')}
                 </button>
               )}
 
               <p className="text-[9px] text-center text-gray-400 font-black uppercase tracking-widest pt-2">
-                Fast & Secure Delivery • Customer Support
+                {t('fastResponse')} • {t('whatsAppSupport')}
               </p>
             </div>
           )}

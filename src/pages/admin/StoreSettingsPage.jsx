@@ -468,6 +468,32 @@ const StoreSettingsPage = () => {
             </div>
           </div>
         </div>
+
+        {/* Checkout & Orders Section */}
+        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-[var(--primary-color)]/5 border border-gray-100 dark:border-slate-800 overflow-hidden relative">
+          <div className="px-8 py-5 border-b border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-950/50 flex items-center relative z-10">
+            <CheckCircle2 className="text-[var(--primary-color)] mr-3" size={20} />
+            <h2 className="font-black text-gray-900 dark:text-white uppercase tracking-widest text-xs italic">Checkout & Orders</h2>
+          </div>
+          <div className="p-8 space-y-8 relative z-10">
+            <div className="flex items-center justify-between p-6 rounded-2xl bg-gray-50 dark:bg-slate-950/50 border border-gray-100 dark:border-slate-800">
+              <div className="space-y-1">
+                <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight">Require Login for Checkout</h3>
+                <p className="text-xs text-gray-500 font-medium text-balance">If enabled, users must sign in or create an account before they can proceed to the order form.</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  name="requireLoginForCheckout"
+                  checked={formData.requireLoginForCheckout}
+                  onChange={(e) => setFormData(prev => ({ ...prev, requireLoginForCheckout: e.target.checked }))}
+                  className="sr-only peer" 
+                />
+                <div className="w-14 h-7 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--primary-color)]"></div>
+              </label>
+            </div>
+          </div>
+        </div>
         
         <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-[var(--primary-color)]/5 border border-gray-100 dark:border-slate-800 overflow-hidden relative">
           <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--primary-color)] opacity-[0.03] rounded-full -translate-y-1/2 translate-x-1/2" />

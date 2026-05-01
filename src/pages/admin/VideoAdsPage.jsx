@@ -15,11 +15,14 @@ const VideoAdsPage = () => {
     title: '',
     productId: '',
     videoUrl: '',
+    imageUrl: '',
+    type: 'video', // 'video' or 'image'
+    description: '',
     isActive: true
   });
 
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0); // Kept for UI compatibility
+  const [uploadProgress, setUploadProgress] = useState(0); 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [detectedDuration, setDetectedDuration] = useState(null);
@@ -95,23 +98,43 @@ const VideoAdsPage = () => {
     videoElement.src = objectUrl;
   };
 
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setIsUploading(true);
+    setUploadProgress(20);
+    setError('');
+
+    try {
+      const downloadURL = await uploadToStorage(file, 'banners');
+      setFormData(prev => ({ ...prev, imageUrl: downloadURL, videoUrl: '' }));
+      setUploadProgress(100);
+      setSuccess('Image successfully uploaded!');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      setError(`Image upload failed: ${err.message}`);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const startUpload = async (file) => {
     setIsUploading(true);
-    setUploadProgress(10); // Initial progress indicator
+    setUploadProgress(10); 
     setError('');
     
     try {
       const folder = 'marketing-videos';
-      setUploadProgress(50); // Simulate progress as we don't have a progress callback in the utility yet
+      setUploadProgress(50); 
       const downloadURL = await uploadToStorage(file, folder);
       
-      setFormData(prev => ({ ...prev, videoUrl: downloadURL }));
+      setFormData(prev => ({ ...prev, videoUrl: downloadURL, imageUrl: '' }));
       setUploadProgress(100);
-      setSuccess('Video successfully uploaded to local storage!');
+      setSuccess('Video successfully uploaded!');
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       console.error('Video upload error:', err);
-      setError(`Upload failed: ${err.message || 'Unknown error. Check Storage permissions.'}`);
+      setError(`Upload failed: ${err.message || 'Unknown error.'}`);
     } finally {
       setIsUploading(false);
     }
@@ -128,24 +151,24 @@ const VideoAdsPage = () => {
     setError('');
     setSuccess('');
 
-    if (!formData.title || !formData.videoUrl) {
-      setError('Please provide a title and upload a video.');
+    if (!formData.title || (formData.type === 'video' && !formData.videoUrl) || (formData.type === 'image' && !formData.imageUrl)) {
+      setError('Please provide a title and upload the required media.');
       return;
     }
 
     try {
       if (editingAd) {
         await updateVideoAd(editingAd.id, formData);
-        setSuccess('Video Advert updated successfully!');
+        setSuccess('Banner Advert updated successfully!');
       } else {
         await addVideoAd({ ...formData, isActive: true });
-        setSuccess('Video Advert published successfully!');
+        setSuccess('Banner Advert published successfully!');
       }
       
       setTimeout(() => {
         setShowForm(false);
         setEditingAd(null);
-        setFormData({ title: '', productId: '', videoUrl: '', isActive: true });
+        setFormData({ title: '', productId: '', videoUrl: '', imageUrl: '', type: 'video', description: '', isActive: true });
         setSuccess('');
       }, 2000);
     } catch (err) {
@@ -173,6 +196,9 @@ const VideoAdsPage = () => {
       title: ad.title,
       productId: ad.productId || '',
       videoUrl: ad.videoUrl,
+      imageUrl: ad.imageUrl || '',
+      type: ad.type || 'video',
+      description: ad.description || '',
       isActive: ad.isActive ?? true
     });
     setShowForm(true);
@@ -194,7 +220,7 @@ const VideoAdsPage = () => {
           <button
             onClick={() => { 
               setEditingAd(null);
-              setFormData({ title: '', productId: '', videoUrl: '', isActive: true });
+              setFormData({ title: '', productId: '', videoUrl: '', imageUrl: '', type: 'video', description: '', isActive: true });
               setShowForm(true); 
               setError(''); 
               setSuccess(''); 
@@ -202,7 +228,7 @@ const VideoAdsPage = () => {
             className="flex items-center px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-sm transition-all shadow-xl bg-pink-600 text-white hover:bg-pink-700 shadow-pink-500/20 dark:shadow-none hover:-translate-y-1"
           >
             <Plus size={20} className="mr-3" />
-            Upload New Advert
+            Create New Banner
           </button>
         )}
       </div>
@@ -238,6 +264,39 @@ const VideoAdsPage = () => {
               </div>
 
               <div>
+                <label className="block text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2 ml-1">Banner Description</label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  placeholder="Tell your customers more about this promotion or product..."
+                  rows="3"
+                  className="w-full px-5 py-4 bg-gray-50 dark:bg-slate-950/50 border border-gray-200 dark:border-slate-800 rounded-2xl focus:ring-2 focus:ring-pink-500 focus:bg-white dark:focus:bg-slate-950 transition-all outline-none text-gray-900 dark:text-white font-medium resize-none"
+                ></textarea>
+                <p className="text-[10px] text-gray-400 mt-2 ml-1 italic">Visible on the banner. If left empty and a product is linked, we will use the product's description.</p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2 ml-1">Banner Type</label>
+                <div className="flex gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setFormData(p => ({ ...p, type: 'video' }))}
+                    className={`flex-1 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all border ${formData.type === 'video' ? 'bg-pink-600 text-white border-pink-600 shadow-lg shadow-pink-500/20' : 'bg-gray-50 dark:bg-slate-950/50 border-gray-200 dark:border-slate-800 text-gray-400'}`}
+                  >
+                    Video Commercial
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData(p => ({ ...p, type: 'image' }))}
+                    className={`flex-1 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all border ${formData.type === 'image' ? 'bg-pink-600 text-white border-pink-600 shadow-lg shadow-pink-500/20' : 'bg-gray-50 dark:bg-slate-950/50 border-gray-200 dark:border-slate-800 text-gray-400'}`}
+                  >
+                    Static Image
+                  </button>
+                </div>
+              </div>
+
+              <div>
                 <label className="block text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2 ml-1">Link to Product (Optional)</label>
                 <div className="relative">
                   <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
@@ -247,62 +306,96 @@ const VideoAdsPage = () => {
                     onChange={handleInputChange}
                     className="w-full pl-12 pr-5 py-4 bg-gray-50 dark:bg-slate-950/50 border border-gray-200 dark:border-slate-800 rounded-2xl focus:ring-2 focus:ring-pink-500 focus:bg-white dark:focus:bg-slate-950 transition-all outline-none text-gray-900 dark:text-white font-medium appearance-none"
                   >
-                    <option value="">No Link (Just ambient ad)</option>
+                    <option value="">No Link (Just ambient banner)</option>
                     {products.map(p => (
                       <option key={p.id} value={p.id}>{p.name}</option>
                     ))}
                   </select>
                 </div>
-                <p className="text-[10px] text-gray-400 mt-2 ml-1 italic">If selected, the 'Shop Now' button on the advert will take users to this product.</p>
+                <p className="text-[10px] text-gray-400 mt-2 ml-1 italic">If selected, the 'Shop Now' button on the banner will take users to this product.</p>
               </div>
             </div>
 
             <div className="space-y-4">
-              <label className="block text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2 ml-1">Upload Commercial Video *</label>
+              <label className="block text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2 ml-1">
+                {formData.type === 'video' ? 'Upload Commercial Video *' : 'Upload Banner Image *'}
+              </label>
               
-              {!formData.videoUrl ? (
-                <div className="relative">
-                  <label className={`w-full h-40 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center transition-all ${isUploading ? 'border-pink-300 bg-pink-50 dark:bg-pink-900/10 dark:border-pink-900/50 cursor-wait' : 'border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-950/50 hover:bg-pink-50 hover:border-pink-500 cursor-pointer text-gray-400 dark:text-gray-500 hover:text-pink-600'}`}>
-                    {isUploading ? (
-                      <>
-                        <Loader2 size={32} className="animate-spin mb-3 text-pink-500" />
-                        <span className="text-xs font-black uppercase tracking-widest text-pink-600">Uploading {uploadProgress}%</span>
-                        <div className="w-1/2 bg-gray-200 dark:bg-slate-800 rounded-full h-1 mt-3 overflow-hidden">
-                          <div className="bg-pink-500 h-1 rounded-full transition-all duration-300" style={{ width: `${uploadProgress}%` }}></div>
-                        </div>
-                        <button 
-                          type="button" 
-                          onClick={cancelUpload}
-                          className="mt-4 px-4 py-1.5 bg-white dark:bg-slate-900 border border-pink-200 text-pink-600 text-[10px] font-black uppercase rounded-full hover:bg-pink-50 transition-all"
-                        >
-                          Cancel Upload
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <Plus size={36} className="mb-2" />
-                        <span className="text-[10px] font-black uppercase tracking-widest">Select MP4 Video</span>
-                      </>
-                    )}
-                    <input type="file" className="hidden" accept="video/mp4,video/webm" onChange={handleVideoUpload} disabled={isUploading} />
-                  </label>
-                </div>
-              ) : (
-                <div className="relative rounded-2xl overflow-hidden border border-gray-200 dark:border-slate-800 bg-black aspect-video flex items-center justify-center">
-                  <video src={formData.videoUrl} autoPlay loop muted playsInline className="w-full h-full object-cover opacity-80"></video>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40">
-                    <CheckCircle2 size={40} className="text-green-400 mb-2" />
-                    <span className="text-white text-[10px] font-black uppercase tracking-widest">Video Ready</span>
-                    {detectedDuration && (
-                      <span className="text-white/60 text-[9px] font-bold uppercase tracking-widest mt-1 italic">
-                        {detectedDuration.toFixed(1)}s Recorded
-                      </span>
-                    )}
+              {formData.type === 'video' ? (
+                !formData.videoUrl ? (
+                  <div className="relative">
+                    <label className={`w-full h-40 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center transition-all ${isUploading ? 'border-pink-300 bg-pink-50 dark:bg-pink-900/10 dark:border-pink-900/50 cursor-wait' : 'border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-950/50 hover:bg-pink-50 hover:border-pink-500 cursor-pointer text-gray-400 dark:text-gray-500 hover:text-pink-600'}`}>
+                      {isUploading ? (
+                        <>
+                          <Loader2 size={32} className="animate-spin mb-3 text-pink-500" />
+                          <span className="text-xs font-black uppercase tracking-widest text-pink-600">Uploading {uploadProgress}%</span>
+                          <div className="w-1/2 bg-gray-200 dark:bg-slate-800 rounded-full h-1 mt-3 overflow-hidden">
+                            <div className="bg-pink-500 h-1 rounded-full transition-all duration-300" style={{ width: `${uploadProgress}%` }}></div>
+                          </div>
+                          <button 
+                            type="button" 
+                            onClick={cancelUpload}
+                            className="mt-4 px-4 py-1.5 bg-white dark:bg-slate-900 border border-pink-200 text-pink-600 text-[10px] font-black uppercase rounded-full hover:bg-pink-50 transition-all"
+                          >
+                            Cancel Upload
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <Video size={36} className="mb-2" />
+                          <span className="text-[10px] font-black uppercase tracking-widest">Select MP4 Video</span>
+                        </>
+                      )}
+                      <input type="file" className="hidden" accept="video/mp4,video/webm" onChange={handleVideoUpload} disabled={isUploading} />
+                    </label>
                   </div>
-                  <button type="button" onClick={() => setFormData(p => ({ ...p, videoUrl: '' }))} className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg text-[10px] font-bold uppercase z-10 transition-colors shadow-lg">
-                    Change
-                  </button>
-                </div>
+                ) : (
+                  <div className="relative rounded-2xl overflow-hidden border border-gray-200 dark:border-slate-800 bg-black aspect-video flex items-center justify-center">
+                    <video src={formData.videoUrl} autoPlay loop muted playsInline className="w-full h-full object-cover opacity-80"></video>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40">
+                      <CheckCircle2 size={40} className="text-green-400 mb-2" />
+                      <span className="text-white text-[10px] font-black uppercase tracking-widest">Video Ready</span>
+                      {detectedDuration && (
+                        <span className="text-white/60 text-[9px] font-bold uppercase tracking-widest mt-1 italic">
+                          {detectedDuration.toFixed(1)}s Recorded
+                        </span>
+                      )}
+                    </div>
+                    <button type="button" onClick={() => setFormData(p => ({ ...p, videoUrl: '' }))} className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg text-[10px] font-bold uppercase z-10 transition-colors shadow-lg">
+                      Change
+                    </button>
+                  </div>
+                )
+              ) : (
+                !formData.imageUrl ? (
+                  <div className="relative">
+                    <label className={`w-full h-40 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center transition-all ${isUploading ? 'border-pink-300 bg-pink-50 dark:bg-pink-900/10 dark:border-pink-900/50 cursor-wait' : 'border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-950/50 hover:bg-pink-50 hover:border-pink-500 cursor-pointer text-gray-400 dark:text-gray-500 hover:text-pink-600'}`}>
+                      {isUploading ? (
+                        <>
+                          <Loader2 size={32} className="animate-spin mb-3 text-pink-500" />
+                          <span className="text-xs font-black uppercase tracking-widest text-pink-600">Uploading {uploadProgress}%</span>
+                        </>
+                      ) : (
+                        <>
+                          <Plus size={36} className="mb-2" />
+                          <span className="text-[10px] font-black uppercase tracking-widest">Select Banner Image</span>
+                        </>
+                      )}
+                      <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={isUploading} />
+                    </label>
+                  </div>
+                ) : (
+                  <div className="relative rounded-2xl overflow-hidden border border-gray-200 dark:border-slate-800 bg-gray-100 aspect-video flex items-center justify-center">
+                    <img src={formData.imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40">
+                      <CheckCircle2 size={40} className="text-green-400 mb-2" />
+                      <span className="text-white text-[10px] font-black uppercase tracking-widest">Image Ready</span>
+                    </div>
+                    <button type="button" onClick={() => setFormData(p => ({ ...p, imageUrl: '' }))} className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg text-[10px] font-bold uppercase z-10 transition-colors shadow-lg">
+                      Change
+                    </button>
+                  </div>
+                )
               )}
 
               {/* Status Messages for Form */}
@@ -321,10 +414,10 @@ const VideoAdsPage = () => {
               {/* Submit */}
               <button
                 type="submit"
-                disabled={isUploading || !formData.videoUrl}
+                disabled={isUploading || (formData.type === 'video' ? !formData.videoUrl : !formData.imageUrl)}
                 className="w-full mt-6 py-4 bg-gradient-to-r from-pink-600 to-rose-600 text-white font-black uppercase tracking-widest text-sm rounded-2xl hover:from-pink-700 hover:to-rose-700 transition-all shadow-xl shadow-pink-600/20 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {editingAd ? 'Update Advert' : 'Publish Advert'}
+                {editingAd ? 'Update Banner' : 'Publish Banner'}
               </button>
             </div>
           </form>
@@ -339,13 +432,22 @@ const VideoAdsPage = () => {
             return (
               <div key={ad.id} className="bg-white dark:bg-slate-900 rounded-3xl overflow-hidden shadow-sm border border-gray-100 dark:border-slate-800 hover:shadow-xl transition-all duration-300 group flex flex-col">
                 <div className="relative aspect-video bg-black overflow-hidden">
-                   <video 
-                     src={ad.videoUrl} 
-                     autoPlay loop muted playsInline 
-                     className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
-                   />
+                   {ad.type === 'image' ? (
+                     <img 
+                       src={ad.imageUrl} 
+                       alt={ad.title}
+                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                     />
+                   ) : (
+                     <video 
+                       src={ad.videoUrl} 
+                       autoPlay loop muted playsInline 
+                       className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
+                     />
+                   )}
                    <div className="absolute top-3 left-3 bg-pink-600 text-white px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest shadow-lg flex items-center">
-                      <PlaySquare size={10} className="mr-1.5" /> Advert
+                      {ad.type === 'image' ? <Plus size={10} className="mr-1.5" /> : <PlaySquare size={10} className="mr-1.5" />} 
+                      {ad.type === 'image' ? 'Image Banner' : 'Video Banner'}
                    </div>
                 </div>
                 <div className="p-5 flex-grow flex flex-col justify-between">

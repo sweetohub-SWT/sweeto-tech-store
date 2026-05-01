@@ -16,6 +16,8 @@ const AdminSidebar = ({ isMobileOpen, onCloseMobile }) => {
     { to: '/admin/analytics', icon: MousePointer2, label: 'Analytics' },
     { to: '/admin/video-ads', icon: Video, label: 'Video Ads' },
     { to: '/admin/layout', icon: Layout, label: 'Storefront Layout' },
+    { to: '/admin/hero', icon: Layout, label: 'Hero Banner' },
+    { to: '/admin/home-categories', icon: Grid3x3, label: 'Category Display' },
     { to: '/admin/reviews', icon: MessageSquare, label: 'Reviews' },
     { to: '/admin/settings', icon: Settings, label: t('storeSettings') },
   ];

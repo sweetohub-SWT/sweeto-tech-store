@@ -87,6 +87,7 @@ export const getCartWhatsAppLink = (phone, items, total, shopName = 'SWEETO-HUB'
   if (customerDetails) {
     message += `👤 *CUSTOMER DETAILS*\n`;
     message += `Name: ${customerDetails.name}\n`;
+    message += `Phone: ${customerDetails.phone}\n`;
     message += `Location: ${customerDetails.location}\n`;
     if (customerDetails.notes) {
       message += `Notes: ${customerDetails.notes}\n`;

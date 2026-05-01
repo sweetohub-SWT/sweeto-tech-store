@@ -107,6 +107,28 @@ export const UserAuthProvider = ({ children }) => {
     setIsAuthenticated(false);
   };
 
+  const deleteAccount = async () => {
+    if (!user?.id) return { success: false, error: 'No user to delete' };
+    
+    try {
+      // Remove from persistent DB (users table)
+      await apiService.delete('users', user.id);
+      
+      // Clear local session
+      localStorage.removeItem('local_customer_user');
+      setUser(null);
+      setIsAuthenticated(false);
+      return { success: true };
+    } catch (err) {
+      console.error('Failed to delete account from DB', err);
+      // Even if DB fails, clear local session for safety
+      localStorage.removeItem('local_customer_user');
+      setUser(null);
+      setIsAuthenticated(false);
+      return { success: false, error: 'Failed to delete record, but session cleared' };
+    }
+  };
+
   const isAdmin = user?.email === 'sweeto@sweeto.com';
 
   const value = {
@@ -117,6 +139,7 @@ export const UserAuthProvider = ({ children }) => {
     loginWithGoogle,
     register,
     logout,
+    deleteAccount,
     loading
   };
 

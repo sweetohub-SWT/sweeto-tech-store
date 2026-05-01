@@ -5,6 +5,7 @@ import { Mail, Phone, MapPin, Package, Heart, ShoppingCart, CheckCircle2 } from 
 import { useStoreData } from '../contexts/StoreDataContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useToast } from '../contexts/ToastContext';
+import { useLocale } from '../contexts/LocaleContext';
 
 const FacebookIcon = ({ size, className }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
@@ -34,18 +35,19 @@ const Footer = () => {
   const { storeSettings, categories, products } = useStoreData();
   const { primaryColor } = useTheme();
   const { showToast } = useToast();
+  const { t } = useLocale();
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
 
   const handleSubscribe = () => {
     const trimmed = email.trim();
     if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
-      showToast('Please enter a valid email address.', 'error');
+      showToast(t('enterEmail'), 'error');
       return;
     }
     setSubscribed(true);
     setEmail('');
-    showToast('🎉 You\'re subscribed! Expect exclusive drops soon.', 'success');
+    showToast(t('subscribedMsg'), 'success');
   };
 
   // Dynamically derive categories from both categories table and product inventory
@@ -95,13 +97,13 @@ const Footer = () => {
                   {storeSettings.shopName?.split(' ')[0] || 'SWEETO'} <span className="text-[var(--primary-color)]">{storeSettings.shopName?.split(' ').slice(1).join(' ') || 'HUBS'}</span>
                 </span>
                 <span className="text-[11px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.5em] mt-2">
-                  {storeSettings.storeTagline || 'Premium Tech Destination'}
+                  {storeSettings.storeTagline || t('tagline')}
                 </span>
               </div>
             </Link>
             
             <p className="text-base text-gray-500 dark:text-gray-400 leading-relaxed font-medium max-w-sm">
-              Defining the next generation of premium tech retail. We bridge the gap between innovation and luxury, curating only the world's most exceptional electronics.
+              {t('missionDesc')}
             </p>
 
             <div className="flex items-center gap-4 pt-2">
@@ -135,7 +137,7 @@ const Footer = () => {
           <div className="lg:col-span-5 grid grid-cols-2 gap-8 lg:gap-12 pl-0 lg:pl-10">
             <div className="flex flex-col">
               <h4 className="text-[12px] font-black uppercase tracking-[0.4em] text-gray-900 dark:text-white relative inline-block mb-8">
-                Discovery
+                {t('discovery')}
                 <span className="absolute -bottom-2 left-0 w-8 h-1 bg-[var(--primary-color)] rounded-full" />
               </h4>
               <nav className="flex flex-col gap-3">
@@ -150,18 +152,18 @@ const Footer = () => {
 
             <div className="flex flex-col">
               <h4 className="text-[12px] font-black uppercase tracking-[0.4em] text-gray-900 dark:text-white relative inline-block mb-8">
-                Resources
+                {t('resources')}
                 <span className="absolute -bottom-2 left-0 w-8 h-1 bg-[var(--primary-color)] rounded-full" />
               </h4>
               <nav className="flex flex-col gap-3">
                 {[
-                  { name: 'About Us', path: '/about' },
-                  { name: 'Contact Us', path: '/contact' },
-                  { name: 'Your Cart', path: '/cart' },
-                  { name: 'Wishlist', path: '/wishlist' },
-                  { name: 'Admin Portal', path: '/login' },
-                  { name: 'Privacy Policy', path: '#' },
-                  { name: 'Terms of Use', path: '#' }
+                  { name: t('aboutUs'), path: '/about' },
+                  { name: t('contactUs'), path: '/contact' },
+                  { name: t('yourCart'), path: '/cart' },
+                  { name: t('wishlist'), path: '/wishlist' },
+                  { name: t('adminPanel'), path: '/login' },
+                  { name: t('privacyPolicy'), path: '/privacy' },
+                  { name: t('termsOfUse'), path: '/terms' }
                 ].map((link, i) => (
                   <Link key={i} to={link.path} className="text-[13px] text-gray-500 dark:text-gray-400 hover:text-[var(--primary-color)] transition-all font-bold uppercase tracking-tight flex items-center gap-3 group/link">
                     <span className="w-0 h-[2px] bg-[var(--primary-color)] transition-all duration-300 group-hover/link:w-4" />
@@ -176,18 +178,18 @@ const Footer = () => {
           <div className="lg:col-span-3 space-y-8">
             <div className="flex flex-col">
               <h4 className="text-[12px] font-black uppercase tracking-[0.4em] text-gray-900 dark:text-white relative inline-block mb-8">
-                Updates
+                {t('updates')}
                 <span className="absolute -bottom-2 left-0 w-8 h-1 bg-[var(--primary-color)] rounded-full" />
               </h4>
             </div>
             <p className="text-sm text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
-              Subscribe to receive curated tech drops and exclusive editorial content.
+              {t('newsletterDesc')}
             </p>
             <div className="space-y-6">
               {subscribed ? (
                 <div className="flex items-center gap-3 px-6 py-5 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-[2rem]">
                   <CheckCircle2 size={18} className="text-green-500 shrink-0" />
-                  <p className="text-[11px] font-black tracking-widest text-green-700 dark:text-green-400 uppercase">You&apos;re subscribed!</p>
+                  <p className="text-[11px] font-black tracking-widest text-green-700 dark:text-green-400 uppercase">{t('subscribedStatus')}</p>
                 </div>
               ) : (
                 <div className="relative group">
@@ -196,14 +198,14 @@ const Footer = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSubscribe()}
-                    placeholder="ENTER EMAIL"
+                    placeholder={t('enterEmail')}
                     className="w-full bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-800 px-6 py-5 rounded-[2rem] text-[11px] font-black tracking-widest focus:ring-2 focus:ring-[var(--primary-color)] focus:border-transparent outline-none transition-all placeholder:text-gray-400"
                   />
                   <button
                     onClick={handleSubscribe}
                     className="absolute right-2 top-2 bottom-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-6 rounded-full text-[10px] font-black tracking-widest hover:bg-[var(--primary-color)] dark:hover:bg-[var(--primary-color)] hover:text-white transition-all transform active:scale-95"
                   >
-                    SUBSCRIBE
+                    {t('subscribe')}
                   </button>
                 </div>
               )}
@@ -217,7 +219,7 @@ const Footer = () => {
                     <Phone size={20} />
                   </div>
                   <div>
-                    <p className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em]">Contact Us</p>
+                    <p className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em]">{t('contactUs')}</p>
                     <p className="text-sm font-black text-gray-900 dark:text-white tracking-tight hover:text-[var(--primary-color)] transition-colors">{storeSettings.shopPhone || '+1-800-SWEETO'}</p>
                   </div>
                 </a>
@@ -231,16 +233,16 @@ const Footer = () => {
           <div className="flex items-center gap-3">
             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
             <p className="text-[12px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest">
-              &copy; {new Date().getFullYear()} {storeSettings.shopName}. All rights reserved.
+              &copy; {new Date().getFullYear()} {storeSettings.shopName}. {t('allRightsReserved')}
             </p>
           </div>
           
           <div className="flex items-center gap-10">
             {[
-              { label: 'Privacy', path: '/privacy' },
-              { label: 'Terms', path: '/terms' },
-              { label: 'Security', path: '/security' },
-              { label: 'Cookies', path: '/cookies' },
+              { label: t('privacy'), path: '/privacy' },
+              { label: t('terms'), path: '/terms' },
+              { label: t('security'), path: '/security' },
+              { label: t('cookies'), path: '/cookies' },
             ].map((item) => (
               <Link key={item.label} to={item.path} className="text-[11px] font-black text-gray-400 hover:text-[var(--primary-color)] cursor-pointer transition-all tracking-widest uppercase hover:tracking-[0.2em]">
                 {item.label}

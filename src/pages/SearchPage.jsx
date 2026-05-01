@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import { useStoreData } from '../contexts/StoreDataContext';
+import { useLocale } from '../contexts/LocaleContext';
 import { updateSEO } from '../utils/seoHelper';
 import ProductCard from '../components/ProductCard';
 import { getCategoryHeroImage } from '../utils/categoryData';
@@ -12,6 +13,7 @@ const SearchPage = () => {
   const query = searchParams.get('q') || '';
   const filter = searchParams.get('filter') || '';
   const { products, categories, logSearch } = useStoreData();
+  const { t } = useLocale();
 
   const searchResults = React.useMemo(() => {
     let filtered = products.filter(p => p.status === 'active');
@@ -44,15 +46,15 @@ const SearchPage = () => {
   }, [query, filter, products, categories]);
 
   useEffect(() => {
-    let title = 'Search Results';
-    if (filter === 'newest') title = 'New Arrivals';
-    if (filter === 'sale') title = 'Top Deals';
-    if (filter === 'featured') title = 'Featured Collection';
-    if (query) title = `Search: ${query}`;
+    let titleStr = t('searchResults');
+    if (filter === 'newest') titleStr = t('newArrivals');
+    if (filter === 'sale') titleStr = t('topDeals');
+    if (filter === 'featured') titleStr = t('featuredCollection');
+    if (query) titleStr = `${t('search')}: ${query}`;
 
     updateSEO({
-      title: `${title} | Sweeto Hubs`,
-      description: `Browse ${title.toLowerCase()} at Sweeto Hubs. Find the best electronics at the best prices.`,
+      title: `${titleStr} | Sweeto Hubs`,
+      description: `Browse ${titleStr.toLowerCase()} at Sweeto Hubs. Find the best electronics at the best prices.`,
       type: 'website'
     });
 
@@ -62,11 +64,11 @@ const SearchPage = () => {
   }, [query, filter, searchResults.length, logSearch]);
 
   const pageTitle = React.useMemo(() => {
-    if (filter === 'newest') return 'New Arrivals';
-    if (filter === 'sale') return 'Flash Sale Deals';
-    if (filter === 'featured') return 'Featured Collection';
-    return 'Search Results';
-  }, [filter]);
+    if (filter === 'newest') return t('newArrivals');
+    if (filter === 'sale') return t('topDeals');
+    if (filter === 'featured') return t('featuredCollection');
+    return t('searchResults');
+  }, [filter, t]);
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] dark:bg-slate-950 transition-colors pb-20 overflow-x-hidden">
@@ -95,12 +97,12 @@ const SearchPage = () => {
               <div className="p-1.5 rounded-full border border-white/20 group-hover:border-white/50 transition-colors">
                 <ChevronLeft size={12} />
               </div>
-              Back
+              {t('back')}
             </button>
 
             <div className="flex items-center gap-4 mb-2">
               <div className="w-8 h-1 bg-[var(--primary-color)] rounded-full"></div>
-              <span className="text-[10px] font-black uppercase tracking-[0.5em] text-[var(--primary-color)]">COLLECTION</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.5em] text-[var(--primary-color)]">{t('collection')}</span>
             </div>
             
             <h1 className="text-4xl lg:text-7xl font-black text-white tracking-tighter uppercase italic leading-[0.9]">
@@ -108,7 +110,7 @@ const SearchPage = () => {
             </h1>
             
             <p className="mt-6 text-sm lg:text-lg text-gray-300 font-medium max-w-xl leading-relaxed opacity-80 border-l-2 border-white/10 pl-6 uppercase tracking-widest text-[10px]">
-              {searchResults.length} Products Found {query ? <>for "{query}"</> : <>in this set</>}
+              {searchResults.length} {t('productsFound')} {query ? <>{t('for')} "{query}"</> : <>{t('inThisSet')}</>}
             </p>
           </div>
         </div>
@@ -118,18 +120,18 @@ const SearchPage = () => {
         {/* Results Toolbar */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 p-8 bg-white dark:bg-slate-900/40 backdrop-blur-md rounded-[2.5rem] border border-white/50 dark:border-slate-800/50 shadow-sm">
           <div>
-            <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-1">DISCOVERY HUB</h2>
+            <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-1">{t('discoveryHub')}</h2>
             <div className="flex items-center gap-2">
                <span className="text-xl font-black uppercase italic tracking-tighter text-gray-900 dark:text-white">
-                 Filtered Results
+                 {t('filteredResults')}
                </span>
             </div>
           </div>
 
           <div className="flex items-center gap-4">
-             <Link to="/" className="text-[10px] font-black uppercase tracking-widest bg-gray-50 dark:bg-slate-800 px-6 py-3 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
-               Reset Filter
-             </Link>
+              <Link to="/search" className="text-[10px] font-black uppercase tracking-widest bg-gray-50 dark:bg-slate-800 px-6 py-3 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
+                {t('resetFilter')}
+              </Link>
           </div>
         </div>
 
@@ -147,12 +149,12 @@ const SearchPage = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
-            <h3 className="text-3xl font-black text-gray-900 dark:text-white mb-4 uppercase italic tracking-tighter">No Matches</h3>
+            <h3 className="text-3xl font-black text-gray-900 dark:text-white mb-4 uppercase italic tracking-tighter">{t('noMatches')}</h3>
             <p className="text-gray-400 dark:text-slate-500 text-center max-w-sm font-bold uppercase tracking-widest text-[10px] mb-10 px-6">
-              We couldn't find any products matching your criteria. Try different keywords.
+              {t('noMatchesDesc')}
             </p>
             <Link to="/" className="bg-black dark:bg-white text-white dark:text-black px-12 py-5 rounded-full font-black uppercase text-[10px] tracking-[0.3em] hover:scale-105 transition-all shadow-2xl">
-              BACK TO EXPLORE
+              {t('backToExplore')}
             </Link>
           </div>
         )}

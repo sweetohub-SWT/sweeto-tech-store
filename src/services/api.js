@@ -1,20 +1,18 @@
-const API_BASE_URL = `http://${window.location.hostname}:3001`;
+import { supabase } from './supabaseClient';
 
 class ApiService {
-  /**
-   * Local-disk (via JSON Server) based API service
-   */
   async getAll(resource) {
     try {
-      const response = await fetch(`${API_BASE_URL}/${resource}`);
-      if (!response.ok) throw new Error('Network response was not ok');
-      const data = await response.json();
+      const { data, error } = await supabase.from(resource).select('*');
+      if (error) throw error;
       
-      // Update local storage for "offline" fallback
-      localStorage.setItem(`sweeto_tech_db_${resource}`, JSON.stringify(data));
-      return data;
+      // Keep local storage as a fallback cache
+      if (data && data.length > 0) {
+        localStorage.setItem(`sweeto_tech_db_${resource}`, JSON.stringify(data));
+      }
+      return data || [];
     } catch (error) {
-      console.error(`Fetch failed for ${resource}, falling back to localStorage:`, error);
+      console.error(`Supabase fetch failed for ${resource}, falling back to localStorage:`, error);
       const localData = JSON.parse(localStorage.getItem(`sweeto_tech_db_${resource}`) || '[]');
       return localData;
     }
@@ -22,9 +20,9 @@ class ApiService {
 
   async getOne(resource, id) {
     try {
-      const response = await fetch(`${API_BASE_URL}/${resource}/${id}`);
-      if (!response.ok) return null;
-      return await response.json();
+      const { data, error } = await supabase.from(resource).select('*').eq('id', id).single();
+      if (error) throw error;
+      return data;
     } catch (error) {
       const data = await this.getAll(resource);
       return data.find(item => String(item.id) === String(id)) || null;
@@ -38,20 +36,20 @@ class ApiService {
     };
 
     try {
-      const response = await fetch(`${API_BASE_URL}/${resource}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newItem)
-      });
-      const data = await response.json();
+      const { data, error } = await supabase.from(resource).insert([newItem]).select();
+      if (error) throw error;
       
-      // Update local storage
+      // Update local cache
       const localData = await this.getAll(resource);
-      localStorage.setItem(`sweeto_tech_db_${resource}`, JSON.stringify(localData));
+      const exists = localData.find(i => i.id === newItem.id);
+      if (!exists) {
+        localData.push(data?.[0] || newItem);
+        localStorage.setItem(`sweeto_tech_db_${resource}`, JSON.stringify(localData));
+      }
       
-      return data;
+      return data?.[0] || newItem;
     } catch (error) {
-      console.error(`Create failed for ${resource}, using localStorage only:`, error);
+      console.error(`Supabase create failed for ${resource}, using localStorage only:`, error);
       const data = await this.getAll(resource);
       data.push(newItem);
       localStorage.setItem(`sweeto_tech_db_${resource}`, JSON.stringify(data));
@@ -61,20 +59,12 @@ class ApiService {
 
   async update(resource, id, updates) {
     try {
-      const response = await fetch(`${API_BASE_URL}/${resource}/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates)
-      });
-      const data = await response.json();
+      const { data, error } = await supabase.from(resource).update(updates).eq('id', id).select();
+      if (error) throw error;
       
-      // Update local storage
-      const localData = await this.getAll(resource);
-      localStorage.setItem(`sweeto_tech_db_${resource}`, JSON.stringify(localData));
-      
-      return data;
+      return data?.[0] || null;
     } catch (error) {
-      console.error(`Update failed for ${resource}/${id}, using localStorage only:`, error);
+      console.error(`Supabase update failed for ${resource}/${id}, using localStorage only:`, error);
       let data = await this.getAll(resource);
       let updatedItem = null;
       
@@ -93,15 +83,11 @@ class ApiService {
 
   async delete(resource, id) {
     try {
-      await fetch(`${API_BASE_URL}/${resource}/${id}`, { method: 'DELETE' });
-      
-      // Update local storage
-      const localData = await this.getAll(resource);
-      localStorage.setItem(`sweeto_tech_db_${resource}`, JSON.stringify(localData));
-      
+      const { error } = await supabase.from(resource).delete().eq('id', id);
+      if (error) throw error;
       return { success: true };
     } catch (error) {
-      console.error(`Delete failed for ${resource}/${id}, using localStorage only:`, error);
+      console.error(`Supabase delete failed for ${resource}/${id}, using localStorage only:`, error);
       let data = await this.getAll(resource);
       data = data.filter(item => String(item.id) !== String(id));
       localStorage.setItem(`sweeto_tech_db_${resource}`, JSON.stringify(data));
@@ -134,16 +120,14 @@ class ApiService {
     const currentSettings = await this.getStoreSettings() || { id: 'main' };
     const updatedSettings = { ...currentSettings, ...updates };
     
-    // If it's a new setup, we might need to create it first
     try {
       const existing = await this.getStoreSettings();
-      if (!existing) {
+      if (!existing || Object.keys(existing).length === 0) {
         return await this.create('storeSettings', updatedSettings);
       } else {
         return await this.update('storeSettings', existing.id, updates);
       }
     } catch (error) {
-      // Legacy localStorage logic if backend is down
       localStorage.setItem('sweeto_tech_db_storeSettings', JSON.stringify([updatedSettings]));
       return updatedSettings;
     }
@@ -161,8 +145,6 @@ class ApiService {
 
   // Database Management
   async importDb(data) {
-    // For import, we'd ideally overwrite the server's db.json
-    // But for now, we just update localStorage and let the server handle its own persistence
     for (const resource in data) {
       localStorage.setItem(`sweeto_tech_db_${resource}`, JSON.stringify(data[resource]));
     }
